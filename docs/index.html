@@ -9,36 +9,47 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
+  <div class="bar">
+    <div class="container">
+      <nav class="nav">
+        <a href="https://zarlcorp.github.io" class="nav-brand">zarlcorp</a>
+        <a href="docs.html">Docs</a>
+        <a href="https://zarlcorp.github.io">Org</a>
+        <a href="https://github.com/zarlcorp/zvault">GitHub</a>
+      </nav>
+    </div>
+  </div>
 
-    <nav class="nav">
-      <a href="https://zarlcorp.github.io" class="nav-brand">zarlcorp</a>
-      <a href="docs.html">Docs</a>
-      <a href="https://github.com/zarlcorp/zvault">GitHub</a>
-    </nav>
+  <div class="landing">
+    <div class="container">
 
-    <header class="hero">
-      <div class="logo">zvault</div>
-      <div class="tagline">Encrypted local storage for secrets, keys, notes. Your data, your machine, your keys.</div>
-      <div class="status-badge">Coming soon</div>
-    </header>
+      <header class="hero">
+        <div class="logo">zvault</div>
+        <div class="tagline">Encrypted local storage for secrets, keys, notes. Your data, your machine, your keys.</div>
+        <div class="status-badge">Coming soon</div>
+      </header>
 
-    <section class="features">
-      <ul class="feature-list">
-        <li>Store secrets encrypted at rest</li>
-        <li>Master password with Argon2id key derivation</li>
-        <li>Organize with tags and folders</li>
-        <li>Search across entries</li>
-        <li>Auto-lock after inactivity</li>
-        <li>Export/import (encrypted format only)</li>
-      </ul>
-    </section>
+      <section class="features">
+        <div class="window">
+          <div class="window-title">planned features</div>
+          <div class="window-content">
+            <ul class="feature-list">
+              <li>Encrypted local vault with age encryption</li>
+              <li>Key management and secret storage</li>
+              <li>Secure notes with full-text search</li>
+              <li>Interactive TUI + scriptable CLI</li>
+              <li>Single binary, no cloud, no accounts</li>
+            </ul>
+          </div>
+        </div>
+      </section>
 
-    <footer class="footer">
-      <p>Open source. MIT licensed.</p>
-      <p><a href="https://github.com/zarlcorp/zvault">github.com/zarlcorp/zvault</a></p>
-    </footer>
+      <footer class="footer">
+        <p>Open source. MIT licensed.</p>
+        <p><a href="https://zarlcorp.github.io">zarlcorp.github.io</a></p>
+      </footer>
 
+    </div>
   </div>
 </body>
 </html>
