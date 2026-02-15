@@ -1,45 +1,57 @@
-/* zvault page-specific overrides */
-/* shared design system lives at https://zarlcorp.github.io/shared.css */
+/* zvault site — page-specific overrides */
+/* shared design system lives at zarlcorp.github.io/shared.css */
 
-/* single-viewport landing — tighten hero spacing */
+/* tool accent — mauve */
+:root { --accent: var(--mauve); }
 
-.hero {
-  padding: 3rem 0 1.5rem;
+/* --- landing page: single viewport --- */
+
+.landing {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
-.tagline {
-  font-size: 1rem;
-  color: var(--muted);
-  font-weight: 400;
-  max-width: 520px;
-  margin: 0.5rem auto 0;
+.landing .hero {
+  padding: 2rem 0 1.5rem;
 }
 
-/* coming soon badge below tagline */
+.landing .tagline {
+  font-size: 1.05rem;
+}
+
+/* coming soon indicator */
 
 .status-badge {
   display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--muted);
-  border: 1px solid var(--subtle);
+  font-size: 0.7rem;
+  color: var(--overlay1);
+  border: 1px solid var(--surface1);
   border-radius: 4px;
-  padding: 0.25rem 0.75rem;
+  padding: 0.2rem 0.65rem;
   margin-top: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  font-weight: 500;
 }
 
-/* features section — centered, compact */
+/* features */
 
 .features {
-  padding: 1.5rem 0 2rem;
-  max-width: 400px;
-  margin: 0 auto;
+  text-align: center;
+  padding: 0.75rem 0;
 }
 
-/* footer — tighter for single viewport */
+.features .feature-list {
+  display: inline-block;
+  text-align: left;
+}
 
-.footer {
-  padding: 2rem 0 3rem;
+/* footer */
+
+.landing .footer {
+  padding: 1rem 0 1.5rem;
 }
