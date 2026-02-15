@@ -4,25 +4,6 @@
 /* tool accent — mauve */
 :root { --accent: var(--mauve); }
 
-/* --- landing page: single viewport --- */
-
-.landing {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 100vh;
-  max-height: 100vh;
-  overflow: hidden;
-}
-
-.landing .hero {
-  padding: 2rem 0 1.5rem;
-}
-
-.landing .tagline {
-  font-size: 1.05rem;
-}
-
 /* coming soon indicator */
 
 .status-badge {
@@ -48,10 +29,4 @@
 .features .feature-list {
   display: inline-block;
   text-align: left;
-}
-
-/* footer */
-
-.landing .footer {
-  padding: 1rem 0 1.5rem;
 }
