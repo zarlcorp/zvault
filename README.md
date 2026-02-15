@@ -70,9 +70,9 @@ make lint
 
 ## Learn More
 
-- [Website](https://zarlcorp.github.io/zvault) — Documentation and install instructions
-- [zarlcorp/core](https://github.com/zarlcorp/core) — Shared packages for zarlcorp tools
-- [MANIFESTO.md](https://github.com/zarlcorp/core/blob/main/MANIFESTO.md) — Why we exist and what we're building
+- [zarlcorp.github.io/zvault](https://zarlcorp.github.io/zvault) — documentation and install instructions
+- [zarlcorp/core](https://github.com/zarlcorp/core) — shared packages for zarlcorp tools
+- [MANIFESTO.md](https://github.com/zarlcorp/core/blob/main/MANIFESTO.md) — why we exist and what we're building
 
 ---
 
