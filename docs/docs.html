@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>zvault — Documentation</title>
+  <meta name="description" content="Planned CLI commands and usage for zvault.">
+  <link rel="stylesheet" href="https://zarlcorp.github.io/shared.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+
+    <nav class="nav">
+      <a href="https://zarlcorp.github.io" class="nav-brand">zarlcorp</a>
+      <a href="index.html">zvault</a>
+      <a href="https://github.com/zarlcorp/zvault">GitHub</a>
+    </nav>
+
+    <div class="doc-content">
+
+      <h1>zvault docs</h1>
+
+      <blockquote>These commands are planned &mdash; zvault is not yet released. This page documents the intended CLI interface.</blockquote>
+
+      <h2>Interactive mode</h2>
+      <p>Launch the TUI for browsing and managing secrets:</p>
+      <pre><code>$ zvault</code></pre>
+      <p>You'll be prompted for your master password, then presented with an interactive interface for navigating entries, searching, and copying secrets to the clipboard.</p>
+
+      <h2>CLI commands</h2>
+
+      <h3>Retrieve a secret</h3>
+      <pre><code>$ zvault get &lt;path&gt;</code></pre>
+      <p>Prints the value of the entry at <code>&lt;path&gt;</code> to stdout. Useful for scripting and piping into other commands.</p>
+
+      <h3>Store a secret</h3>
+      <pre><code>$ zvault set &lt;path&gt;</code></pre>
+      <p>Prompts for the secret value and stores it encrypted at the given path. If the path already exists, the entry is overwritten.</p>
+
+      <h3>Search entries</h3>
+      <pre><code>$ zvault search &lt;query&gt;</code></pre>
+      <p>Searches entry names, tags, and folder paths. Returns matching entries without revealing secret values.</p>
+
+      <hr>
+
+      <p><a href="index.html">&larr; Back to zvault</a></p>
+
+    </div>
+
+    <footer class="footer">
+      <p>Open source. MIT licensed.</p>
+      <p><a href="https://github.com/zarlcorp/zvault">github.com/zarlcorp/zvault</a></p>
+    </footer>
+
+  </div>
+</body>
+</html>

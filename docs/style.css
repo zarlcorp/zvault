@@ -1,0 +1,45 @@
+/* zvault page-specific overrides */
+/* shared design system lives at https://zarlcorp.github.io/shared.css */
+
+/* single-viewport landing — tighten hero spacing */
+
+.hero {
+  padding: 3rem 0 1.5rem;
+}
+
+.tagline {
+  font-size: 1rem;
+  color: var(--muted);
+  font-weight: 400;
+  max-width: 520px;
+  margin: 0.5rem auto 0;
+}
+
+/* coming soon badge below tagline */
+
+.status-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  border: 1px solid var(--subtle);
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  margin-top: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* features section — centered, compact */
+
+.features {
+  padding: 1.5rem 0 2rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* footer — tighter for single viewport */
+
+.footer {
+  padding: 2rem 0 3rem;
+}
