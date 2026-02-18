@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/zarlcorp/core/pkg/zapp"
+	"github.com/zarlcorp/zvault/internal/cli"
 	"github.com/zarlcorp/zvault/internal/tui"
 )
 
@@ -19,9 +19,10 @@ func main() {
 
 	ctx, cancel := zapp.SignalContext(context.Background())
 	defer cancel()
+	_ = ctx // reserved for future use
 
 	if len(os.Args) > 1 {
-		runCLI(ctx, os.Args[1])
+		cli.Run(os.Args[1:], version)
 		_ = app.Close()
 		return
 	}
@@ -34,16 +35,6 @@ func main() {
 
 	if err := app.Close(); err != nil {
 		slog.Error("shutdown", "err", err)
-		os.Exit(1)
-	}
-}
-
-func runCLI(_ context.Context, cmd string) {
-	switch cmd {
-	case "version":
-		fmt.Printf("zvault %s\n", version)
-	default:
-		fmt.Fprintf(os.Stderr, "zvault: unknown command %q\n", cmd)
 		os.Exit(1)
 	}
 }
