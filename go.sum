@@ -1,3 +1,5 @@
+github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=
+github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1 h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1/go.mod h1:uYgXzlJ7ZpABp8OJ+exZzJJhRNQ2ASbcXHWsFqH8hp8=
 github.com/charmbracelet/bubbles v1.0.0 h1:12J8/ak/uCZEMQ6KU7pcfwceyjLlWsDLAxB5fXonfvc=
@@ -50,8 +52,8 @@ github.com/zarlcorp/core/pkg/zoptions v0.1.0 h1:/WgBilZ7tXGfqcq76nd8BOQv/JRaCsj7
 github.com/zarlcorp/core/pkg/zoptions v0.1.0/go.mod h1:JfZ/LnI9wEsmzXpSwmrFRIXCZARt3s9XMUt7UsSbo1s=
 github.com/zarlcorp/core/pkg/zstore v0.1.0 h1:XyKWHhZxSielTRryzChv+4dnRVlTuAnWjGlcFt4W8zI=
 github.com/zarlcorp/core/pkg/zstore v0.1.0/go.mod h1:GRAn1D+wJLpM8EOEbXeagcRHV4XlGeShQvsofCdTy2U=
-github.com/zarlcorp/core/pkg/zstyle v0.1.0 h1:0vuEnMw1mA0uQF46q9ztGFuR3ahWRi1brf/RcF+0WsU=
-github.com/zarlcorp/core/pkg/zstyle v0.1.0/go.mod h1:LIWzzyQZGVL9i7BsddIkWF02w1+4PAMr+KbtdtTapQk=
+github.com/zarlcorp/core/pkg/zstyle v0.5.10 h1:N+UZaFUWPkESJVOgeYfpQqA5Ag4CafOBIh9LFCXR+XQ=
+github.com/zarlcorp/core/pkg/zstyle v0.5.10/go.mod h1:LIWzzyQZGVL9i7BsddIkWF02w1+4PAMr+KbtdtTapQk=
 github.com/zarlcorp/core/pkg/zsync v0.1.0 h1:XR/HFKu+mK/4XkEAkTrcaiCOahyWxqBS5l6XhwgZJwI=
 github.com/zarlcorp/core/pkg/zsync v0.1.0/go.mod h1:uPnywnOHOaotnMrrSzPBeziPPZgtS0aEMZL1XcnrcO4=
 golang.org/x/crypto v0.48.0 h1:/VRzVqiRSggnhY7gNRxPauEQ5Drw9haKdM0jqfcCFts=
