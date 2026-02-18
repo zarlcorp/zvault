@@ -19,13 +19,11 @@ func helpFor(id viewID) []zstyle.HelpPair {
 		}
 	case viewMenu:
 		return []zstyle.HelpPair{
-			{Key: "↑/↓", Desc: "navigate"},
 			{Key: "enter", Desc: "select"},
 			{Key: "q", Desc: "quit"},
 		}
 	case viewSecretList:
 		return []zstyle.HelpPair{
-			{Key: "↑/↓", Desc: "navigate"},
 			{Key: "enter", Desc: "open"},
 			{Key: "n", Desc: "new"},
 			{Key: "d", Desc: "delete"},
@@ -35,7 +33,6 @@ func helpFor(id viewID) []zstyle.HelpPair {
 		}
 	case viewSecretDetail:
 		return []zstyle.HelpPair{
-			{Key: "↑/↓", Desc: "navigate"},
 			{Key: "c", Desc: "copy"},
 			{Key: "s", Desc: "show/hide"},
 			{Key: "e", Desc: "edit"},
@@ -51,19 +48,18 @@ func helpFor(id viewID) []zstyle.HelpPair {
 		}
 	case viewTaskList:
 		return []zstyle.HelpPair{
-			{Key: "↑/↓", Desc: "navigate"},
 			{Key: "enter", Desc: "detail"},
 			{Key: "n", Desc: "new"},
-			{Key: "space", Desc: "toggle done"},
+			{Key: "space", Desc: "done"},
 			{Key: "d", Desc: "delete"},
-			{Key: "x", Desc: "clear done"},
+			{Key: "x", Desc: "clear"},
 			{Key: "tab", Desc: "filter"},
 			{Key: "esc", Desc: "back"},
 		}
 	case viewTaskDetail:
 		return []zstyle.HelpPair{
 			{Key: "e", Desc: "edit"},
-			{Key: "space", Desc: "toggle done"},
+			{Key: "space", Desc: "done"},
 			{Key: "d", Desc: "delete"},
 			{Key: "esc", Desc: "back"},
 		}
