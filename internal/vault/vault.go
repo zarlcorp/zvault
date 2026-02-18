@@ -145,10 +145,9 @@ func (s *SecretStore) Search(query string) ([]secret.Secret, error) {
 		return nil, err
 	}
 
-	q := strings.ToLower(query)
 	var results []secret.Secret
 	for _, sec := range all {
-		if matches(sec, q) {
+		if matches(sec, query) {
 			results = append(results, sec)
 		}
 	}
@@ -157,7 +156,7 @@ func (s *SecretStore) Search(query string) ([]secret.Secret, error) {
 
 func matches(sec secret.Secret, query string) bool {
 	// name: case-insensitive substring
-	if strings.Contains(strings.ToLower(sec.Name), query) {
+	if strings.Contains(strings.ToLower(sec.Name), strings.ToLower(query)) {
 		return true
 	}
 	// tags: exact match

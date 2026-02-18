@@ -1,4 +1,4 @@
-package vault
+package vault_test
 
 import (
 	"testing"
@@ -7,11 +7,12 @@ import (
 	"github.com/zarlcorp/core/pkg/zfilesystem"
 	"github.com/zarlcorp/zvault/internal/secret"
 	"github.com/zarlcorp/zvault/internal/task"
+	"github.com/zarlcorp/zvault/internal/vault"
 )
 
-func openTestVault(t *testing.T) *Vault {
+func openTestVault(t *testing.T) *vault.Vault {
 	t.Helper()
-	v, err := OpenFS(zfilesystem.NewMemFS(), "test-password")
+	v, err := vault.OpenFS(zfilesystem.NewMemFS(), "test-password")
 	if err != nil {
 		t.Fatalf("open vault: %v", err)
 	}
@@ -137,11 +138,11 @@ func TestSecretSearchByName(t *testing.T) {
 		query string
 		want  int
 	}{
-		{"github", 1},   // case-insensitive
-		{"login", 2},    // substring match
-		{"STRIPE", 1},   // case-insensitive
-		{"nothing", 0},  // no match
-		{"Git", 2},      // prefix match
+		{"github", 1},  // case-insensitive
+		{"login", 2},   // substring match
+		{"STRIPE", 1},  // case-insensitive
+		{"nothing", 0}, // no match
+		{"Git", 2},     // prefix match
 	}
 
 	for _, tt := range tests {
@@ -161,11 +162,11 @@ func TestSecretSearchByTag(t *testing.T) {
 	v := openTestVault(t)
 
 	s1 := secret.NewPassword("github", "url", "u", "p")
-	s1.Tags = []string{"work", "dev"}
+	s1.Tags = []string{"Work", "dev"}
 	v.Secrets().Add(s1)
 
 	s2 := secret.NewAPIKey("stripe", "stripe", "key")
-	s2.Tags = []string{"work", "billing"}
+	s2.Tags = []string{"Work", "billing"}
 	v.Secrets().Add(s2)
 
 	s3 := secret.NewNote("personal wifi", "pass")
@@ -176,7 +177,7 @@ func TestSecretSearchByTag(t *testing.T) {
 		query string
 		want  int
 	}{
-		{"work", 2},
+		{"Work", 2},
 		{"dev", 1},
 		{"home", 1},
 		{"nonexistent", 0},
@@ -544,7 +545,7 @@ func TestTaskClearDoneNoDoneTasks(t *testing.T) {
 // --- Vault lifecycle tests ---
 
 func TestVaultOpenClose(t *testing.T) {
-	v, err := OpenFS(zfilesystem.NewMemFS(), "password")
+	v, err := vault.OpenFS(zfilesystem.NewMemFS(), "password")
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
@@ -556,13 +557,13 @@ func TestVaultOpenClose(t *testing.T) {
 func TestVaultWrongPassword(t *testing.T) {
 	fs := zfilesystem.NewMemFS()
 
-	v, err := OpenFS(fs, "correct")
+	v, err := vault.OpenFS(fs, "correct")
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
 	v.Close()
 
-	_, err = OpenFS(fs, "wrong")
+	_, err = vault.OpenFS(fs, "wrong")
 	if err == nil {
 		t.Fatal("expected error for wrong password")
 	}
@@ -572,7 +573,7 @@ func TestVaultPersistence(t *testing.T) {
 	fs := zfilesystem.NewMemFS()
 
 	// first session: write data
-	v1, err := OpenFS(fs, "password")
+	v1, err := vault.OpenFS(fs, "password")
 	if err != nil {
 		t.Fatalf("first open: %v", err)
 	}
@@ -589,7 +590,7 @@ func TestVaultPersistence(t *testing.T) {
 	v1.Close()
 
 	// second session: read data
-	v2, err := OpenFS(fs, "password")
+	v2, err := vault.OpenFS(fs, "password")
 	if err != nil {
 		t.Fatalf("second open: %v", err)
 	}
@@ -613,7 +614,7 @@ func TestVaultPersistence(t *testing.T) {
 }
 
 func TestDefaultDir(t *testing.T) {
-	dir := DefaultDir()
+	dir := vault.DefaultDir()
 	if dir == "" {
 		t.Fatal("default dir is empty")
 	}
@@ -621,14 +622,14 @@ func TestDefaultDir(t *testing.T) {
 
 func TestPasswordFromEnv(t *testing.T) {
 	t.Setenv("ZVAULT_PASSWORD", "env-pass")
-	if got := PasswordFromEnv(); got != "env-pass" {
+	if got := vault.PasswordFromEnv(); got != "env-pass" {
 		t.Fatalf("got %q, want %q", got, "env-pass")
 	}
 }
 
 func TestPasswordFromEnvEmpty(t *testing.T) {
 	t.Setenv("ZVAULT_PASSWORD", "")
-	if got := PasswordFromEnv(); got != "" {
+	if got := vault.PasswordFromEnv(); got != "" {
 		t.Fatalf("got %q, want empty", got)
 	}
 }

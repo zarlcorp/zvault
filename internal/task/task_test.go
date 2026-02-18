@@ -1,13 +1,15 @@
-package task
+package task_test
 
 import (
 	"encoding/hex"
 	"testing"
 	"time"
+
+	"github.com/zarlcorp/zvault/internal/task"
 )
 
 func TestNew(t *testing.T) {
-	tk := New("buy milk")
+	tk := task.New("buy milk")
 
 	if tk.Title != "buy milk" {
 		t.Fatalf("title = %q, want %q", tk.Title, "buy milk")
@@ -15,7 +17,7 @@ func TestNew(t *testing.T) {
 	if tk.Done {
 		t.Fatal("new task should not be done")
 	}
-	if tk.Priority != PriorityNone {
+	if tk.Priority != task.PriorityNone {
 		t.Fatalf("priority = %q, want empty", tk.Priority)
 	}
 	if tk.DueDate != nil {
@@ -31,15 +33,15 @@ func TestNew(t *testing.T) {
 }
 
 func TestTaskFields(t *testing.T) {
-	tk := New("deploy")
-	tk.Priority = PriorityHigh
+	tk := task.New("deploy")
+	tk.Priority = task.PriorityHigh
 	tk.Tags = []string{"ops", "urgent"}
 
 	due := time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
 	tk.DueDate = &due
 
-	if tk.Priority != PriorityHigh {
-		t.Fatalf("priority = %q, want %q", tk.Priority, PriorityHigh)
+	if tk.Priority != task.PriorityHigh {
+		t.Fatalf("priority = %q, want %q", tk.Priority, task.PriorityHigh)
 	}
 	if len(tk.Tags) != 2 {
 		t.Fatalf("tags len = %d, want 2", len(tk.Tags))
@@ -50,7 +52,7 @@ func TestTaskFields(t *testing.T) {
 }
 
 func TestTaskCompletion(t *testing.T) {
-	tk := New("finish spec")
+	tk := task.New("finish spec")
 	if tk.Done {
 		t.Fatal("should not be done initially")
 	}
@@ -69,13 +71,13 @@ func TestTaskCompletion(t *testing.T) {
 
 func TestPriorityConstants(t *testing.T) {
 	tests := []struct {
-		priority Priority
+		priority task.Priority
 		want     string
 	}{
-		{PriorityNone, ""},
-		{PriorityLow, "low"},
-		{PriorityMedium, "medium"},
-		{PriorityHigh, "high"},
+		{task.PriorityNone, ""},
+		{task.PriorityLow, "low"},
+		{task.PriorityMedium, "medium"},
+		{task.PriorityHigh, "high"},
 	}
 
 	for _, tt := range tests {
@@ -89,12 +91,12 @@ func TestPriorityConstants(t *testing.T) {
 
 func TestFilterStatusConstants(t *testing.T) {
 	tests := []struct {
-		status FilterStatus
+		status task.FilterStatus
 		want   string
 	}{
-		{FilterAll, "all"},
-		{FilterPending, "pending"},
-		{FilterDone, "done"},
+		{task.FilterAll, "all"},
+		{task.FilterPending, "pending"},
+		{task.FilterDone, "done"},
 	}
 
 	for _, tt := range tests {
@@ -109,7 +111,7 @@ func TestFilterStatusConstants(t *testing.T) {
 func TestIDUniqueness(t *testing.T) {
 	seen := make(map[string]bool)
 	for range 100 {
-		tk := New("test")
+		tk := task.New("test")
 		if seen[tk.ID] {
 			t.Fatalf("duplicate ID: %s", tk.ID)
 		}
@@ -119,7 +121,7 @@ func TestIDUniqueness(t *testing.T) {
 
 func TestIDFormat(t *testing.T) {
 	for range 50 {
-		tk := New("test")
+		tk := task.New("test")
 		assertValidID(t, tk.ID)
 	}
 }
