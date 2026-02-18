@@ -141,6 +141,14 @@ func (m passwordModel) updateInputs(msg tea.Msg) (passwordModel, tea.Cmd) {
 func (m passwordModel) View() string {
 	var b strings.Builder
 
+	// logo
+	indent := lipgloss.NewStyle().MarginLeft(2)
+	logo := indent.Render(
+		zstyle.StyledLogo(lipgloss.NewStyle().Foreground(zstyle.ZvaultAccent)),
+	)
+	toolName := indent.Render(zstyle.MutedText.Render("zvault"))
+	b.WriteString(fmt.Sprintf("\n%s\n%s\n\n", logo, toolName))
+
 	// title
 	if m.firstRun {
 		title := lipgloss.NewStyle().

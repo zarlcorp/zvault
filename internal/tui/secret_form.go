@@ -83,7 +83,7 @@ func (m secretFormModel) initForCreate() secretFormModel {
 	m.err = ""
 	m.confirmDiscard = false
 	m.inputs = buildFormInputs(m.secType, secret.Secret{})
-	m.focused = 0
+	m.focused = -1 // type selector focused first
 	m.focusCurrent()
 	return m
 }
@@ -206,7 +206,7 @@ func (m secretFormModel) Update(msg tea.Msg) (secretFormModel, tea.Cmd) {
 	}
 
 	// pass to focused input
-	if m.focused < len(m.inputs) {
+	if m.focused >= 0 && m.focused < len(m.inputs) {
 		var cmd tea.Cmd
 		m.inputs[m.focused].input, cmd = m.inputs[m.focused].input.Update(msg)
 		return m, cmd
@@ -226,6 +226,11 @@ func (m secretFormModel) handleDiscardConfirm(msg tea.KeyMsg) (secretFormModel, 
 }
 
 func (m secretFormModel) handleKeys(msg tea.KeyMsg) (secretFormModel, tea.Cmd) {
+	minFocus := 0
+	if m.mode == formCreate {
+		minFocus = -1 // type selector position
+	}
+
 	switch {
 	case msg.Type == tea.KeyCtrlS:
 		return m.save()
@@ -239,7 +244,7 @@ func (m secretFormModel) handleKeys(msg tea.KeyMsg) (secretFormModel, tea.Cmd) {
 
 	case msg.Type == tea.KeyShiftTab:
 		m.changed = true
-		if m.focused > 0 {
+		if m.focused > minFocus {
 			m.focused--
 			m.focusCurrent()
 		}
@@ -254,6 +259,12 @@ func (m secretFormModel) handleKeys(msg tea.KeyMsg) (secretFormModel, tea.Cmd) {
 		return m, nil
 
 	case key.Matches(msg, zstyle.KeyEnter):
+		// enter on type selector moves to first input
+		if m.focused == -1 {
+			m.focused = 0
+			m.focusCurrent()
+			return m, nil
+		}
 		// enter on last field saves
 		if m.focused == len(m.inputs)-1 {
 			return m.save()
@@ -266,8 +277,8 @@ func (m secretFormModel) handleKeys(msg tea.KeyMsg) (secretFormModel, tea.Cmd) {
 		}
 		return m, nil
 
-	case msg.String() == "left" && m.mode == formCreate && m.focused == 0:
-		// cycle type backward
+	case msg.String() == "left" && m.mode == formCreate && m.focused == -1:
+		// cycle type backward (only when type selector is focused)
 		if m.typeSel > 0 {
 			m.typeSel--
 		} else {
@@ -277,16 +288,16 @@ func (m secretFormModel) handleKeys(msg tea.KeyMsg) (secretFormModel, tea.Cmd) {
 		m.rebuildInputsPreserveName()
 		return m, nil
 
-	case msg.String() == "right" && m.mode == formCreate && m.focused == 0:
-		// cycle type forward
+	case msg.String() == "right" && m.mode == formCreate && m.focused == -1:
+		// cycle type forward (only when type selector is focused)
 		m.typeSel = (m.typeSel + 1) % len(typeOptions)
 		m.secType = typeOptions[m.typeSel]
 		m.rebuildInputsPreserveName()
 		return m, nil
 	}
 
-	// pass to focused input
-	if m.focused < len(m.inputs) {
+	// pass to focused input (only when focused >= 0)
+	if m.focused >= 0 && m.focused < len(m.inputs) {
 		var cmd tea.Cmd
 		old := m.inputs[m.focused].input.Value()
 		m.inputs[m.focused].input, cmd = m.inputs[m.focused].input.Update(msg)
@@ -438,8 +449,12 @@ func (m secretFormModel) View() string {
 
 	// type selector (create only)
 	if m.mode == formCreate {
+		cursor := "  "
+		if m.focused == -1 {
+			cursor = lipgloss.NewStyle().Foreground(zstyle.ZvaultAccent).Render("▸ ")
+		}
 		typeLbl := lipgloss.NewStyle().Foreground(zstyle.Subtext1).Render("Type")
-		b.WriteString(fmt.Sprintf("  %s  ", typeLbl))
+		b.WriteString(fmt.Sprintf("  %s%s  ", cursor, typeLbl))
 		for i, t := range typeOptions {
 			label := typeLabel(t)
 			if i == m.typeSel {
@@ -453,8 +468,10 @@ func (m secretFormModel) View() string {
 				b.WriteString(lipgloss.NewStyle().Foreground(zstyle.Surface2).Render(" | "))
 			}
 		}
-		hint := zstyle.MutedText.Render("  (←/→ to change)")
-		b.WriteString(hint)
+		if m.focused == -1 {
+			hint := zstyle.MutedText.Render("  (←/→ to change)")
+			b.WriteString(hint)
+		}
 		b.WriteString("\n\n")
 	}
 
