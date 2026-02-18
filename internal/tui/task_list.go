@@ -475,11 +475,11 @@ func (m taskListModel) confirmPrompt() string {
 		if len(m.tasks) > 0 {
 			t := m.tasks[m.cursor]
 			return fmt.Sprintf("  %s",
-				zstyle.StatusWarn.Render(fmt.Sprintf("Delete \"%s\"? (y/n)", t.Title)))
+				zstyle.StatusWarn.Render(fmt.Sprintf("delete \"%s\"? (y/n)", t.Title)))
 		}
 	case confirmClearDone:
 		return fmt.Sprintf("  %s",
-			zstyle.StatusWarn.Render(fmt.Sprintf("Clear %d done tasks? (y/n)", m.doneCount)))
+			zstyle.StatusWarn.Render(fmt.Sprintf("clear %d done tasks? (y/n)", m.doneCount)))
 	}
 	return ""
 }

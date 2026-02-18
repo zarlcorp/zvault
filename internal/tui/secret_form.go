@@ -497,7 +497,7 @@ func (m secretFormModel) View() string {
 	if m.confirmDiscard {
 		warn := lipgloss.NewStyle().Foreground(zstyle.Warning)
 		b.WriteString("\n")
-		b.WriteString(warn.Render("  Discard changes? (y/n)"))
+		b.WriteString(warn.Render("  discard changes? (y/n)"))
 		b.WriteString("\n")
 	}
 

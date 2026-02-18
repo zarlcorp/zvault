@@ -245,7 +245,7 @@ func TestSecretFormConfirmDiscardView(t *testing.T) {
 	m.confirmDiscard = true
 
 	view := m.View()
-	if !strings.Contains(view, "Discard changes? (y/n)") {
+	if !strings.Contains(view, "discard changes? (y/n)") {
 		t.Error("should show discard confirmation")
 	}
 }
