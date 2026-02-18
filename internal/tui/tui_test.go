@@ -68,14 +68,28 @@ func TestCtrlCQuitsFromMenu(t *testing.T) {
 	}
 }
 
-func TestQQuitsFromPlaceholder(t *testing.T) {
-	views := []viewID{viewSecretList, viewSecretDetail, viewSecretForm, viewTaskList, viewTaskDetail, viewTaskForm}
-	for _, v := range views {
+func TestQQuitsFromNonInputViews(t *testing.T) {
+	// secret list (not searching) and secret detail quit on q
+	quitViews := []viewID{viewSecretList, viewSecretDetail, viewTaskList, viewTaskDetail, viewTaskForm}
+	for _, v := range quitViews {
 		m := newTestModel()
 		m.view = v
 		_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
 		if cmd == nil {
 			t.Fatalf("q should return quit command from view %d", v)
+		}
+	}
+}
+
+func TestQDoesNotQuitFromSecretForm(t *testing.T) {
+	// secret form has text input active, q should not quit
+	m := newTestModel()
+	m.view = viewSecretForm
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
+	if cmd != nil {
+		msg := cmd()
+		if _, ok := msg.(tea.QuitMsg); ok {
+			t.Fatal("q should not quit from secret form (text input active)")
 		}
 	}
 }
