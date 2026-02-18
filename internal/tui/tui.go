@@ -25,9 +25,9 @@ type Model struct {
 	secretList   secretListModel
 	secretDetail secretDetailModel
 	secretForm   secretFormModel
-	taskList     placeholderModel
-	taskDetail   placeholderModel
-	taskForm     placeholderModel
+	taskList     taskListModel
+	taskDetail   taskDetailModel
+	taskForm     taskFormModel
 
 	width  int
 	height int
@@ -45,9 +45,9 @@ func New(version string) Model {
 		secretList:   newSecretList(),
 		secretDetail: newSecretDetail(),
 		secretForm:   newSecretForm(),
-		taskList:     newPlaceholder(viewTaskList),
-		taskDetail:   newPlaceholder(viewTaskDetail),
-		taskForm:     newPlaceholder(viewTaskForm),
+		taskList:     newTaskListModel(nil),
+		taskDetail:   newTaskDetailModel(nil),
+		taskForm:     newTaskFormModel(nil),
 	}
 }
 
@@ -61,9 +61,9 @@ func NewWithDir(version, vaultDir string) Model {
 		secretList:   newSecretList(),
 		secretDetail: newSecretDetail(),
 		secretForm:   newSecretForm(),
-		taskList:     newPlaceholder(viewTaskList),
-		taskDetail:   newPlaceholder(viewTaskDetail),
-		taskForm:     newPlaceholder(viewTaskForm),
+		taskList:     newTaskListModel(nil),
+		taskDetail:   newTaskDetailModel(nil),
+		taskForm:     newTaskFormModel(nil),
 	}
 }
 
@@ -86,7 +86,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.view == viewMenu && m.vault != nil {
 			m.menu = m.menu.refreshCounts(m.vault)
 		}
-		// propagate navigate to secret views so they can load data
+		// propagate navigateMsg to target sub-view so it can load data
 		switch msg.view {
 		case viewSecretList:
 			m.secretList.vault = m.vault
@@ -97,6 +97,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case viewSecretForm:
 			m.secretForm.vault = m.vault
 			m.secretForm, _ = m.secretForm.Update(msg)
+		case viewTaskList:
+			m.taskList.vault = m.vault
+			m.taskList, _ = m.taskList.Update(msg)
+		case viewTaskDetail:
+			m.taskDetail.vault = m.vault
+			m.taskDetail, _ = m.taskDetail.Update(msg)
+		case viewTaskForm:
+			m.taskForm.vault = m.vault
+			m.taskForm, _ = m.taskForm.Update(msg)
 		}
 		return m, nil
 
@@ -108,6 +117,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.secretList.vault = msg.vault
 		m.secretDetail.vault = msg.vault
 		m.secretForm.vault = msg.vault
+		// propagate vault to task views
+		m.taskList.vault = msg.vault
+		m.taskDetail.vault = msg.vault
+		m.taskForm.vault = msg.vault
 		return m, nil
 
 	case errMsg:
@@ -249,6 +262,8 @@ func (m Model) isTextInputActive() bool {
 	case viewSecretList:
 		return m.secretList.searching
 	case viewSecretForm:
+		return true
+	case viewTaskForm:
 		return true
 	}
 	return false

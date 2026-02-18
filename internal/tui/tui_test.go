@@ -69,9 +69,9 @@ func TestCtrlCQuitsFromMenu(t *testing.T) {
 }
 
 func TestQQuitsFromNonInputViews(t *testing.T) {
-	// secret list (not searching) and secret detail quit on q
-	quitViews := []viewID{viewSecretList, viewSecretDetail, viewTaskList, viewTaskDetail, viewTaskForm}
-	for _, v := range quitViews {
+	// views without text inputs: q quits
+	views := []viewID{viewSecretList, viewSecretDetail, viewTaskList, viewTaskDetail}
+	for _, v := range views {
 		m := newTestModel()
 		m.view = v
 		_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
@@ -81,15 +81,18 @@ func TestQQuitsFromNonInputViews(t *testing.T) {
 	}
 }
 
-func TestQDoesNotQuitFromSecretForm(t *testing.T) {
-	// secret form has text input active, q should not quit
-	m := newTestModel()
-	m.view = viewSecretForm
-	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
-	if cmd != nil {
-		msg := cmd()
-		if _, ok := msg.(tea.QuitMsg); ok {
-			t.Fatal("q should not quit from secret form (text input active)")
+func TestQDoesNotQuitFromFormViews(t *testing.T) {
+	// views with text inputs: q types, does not quit
+	views := []viewID{viewSecretForm, viewTaskForm}
+	for _, v := range views {
+		m := newTestModel()
+		m.view = v
+		_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
+		if cmd != nil {
+			msg := cmd()
+			if _, ok := msg.(tea.QuitMsg); ok {
+				t.Fatalf("q should not quit from form view %d (text input)", v)
+			}
 		}
 	}
 }
