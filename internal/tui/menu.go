@@ -80,6 +80,14 @@ func (m menuModel) selectItem() tea.Cmd {
 func (m menuModel) View() string {
 	var b strings.Builder
 
+	// logo
+	indent := lipgloss.NewStyle().MarginLeft(2)
+	logo := indent.Render(
+		zstyle.StyledLogo(lipgloss.NewStyle().Foreground(zstyle.ZvaultAccent)),
+	)
+	toolName := indent.Render(zstyle.MutedText.Render("zvault"))
+	b.WriteString(fmt.Sprintf("\n%s\n%s\n", logo, toolName))
+
 	items := []struct {
 		label string
 		count string

@@ -1,116 +1,85 @@
 package tui
 
-import (
-	"strings"
-
-	"github.com/charmbracelet/lipgloss"
-	"github.com/zarlcorp/core/pkg/zstyle"
-)
-
-var (
-	footerKeyStyle  = lipgloss.NewStyle().Foreground(zstyle.Lavender).Bold(true)
-	footerDescStyle = lipgloss.NewStyle().Foreground(zstyle.Overlay1)
-	footerSepStyle  = lipgloss.NewStyle().Foreground(zstyle.Surface2)
-)
-
-// helpEntry is a key/description pair for the footer.
-type helpEntry struct {
-	key  string
-	desc string
-}
+import "github.com/zarlcorp/core/pkg/zstyle"
 
 // renderFooter returns context-sensitive keybinding help for the current view.
 func renderFooter(id viewID, width int) string {
-	entries := helpFor(id)
-	if len(entries) == 0 {
-		return ""
-	}
-
-	var parts []string
-	sep := footerSepStyle.Render(" | ")
-	for _, e := range entries {
-		k := footerKeyStyle.Render(e.key)
-		d := footerDescStyle.Render(e.desc)
-		parts = append(parts, k+" "+d)
-	}
-
-	line := strings.Join(parts, sep)
 	_ = width
-	return "  " + line
+	return zstyle.RenderFooter(helpFor(id))
 }
 
 // helpFor returns the keybinding entries for a given view.
-func helpFor(id viewID) []helpEntry {
+func helpFor(id viewID) []zstyle.HelpPair {
 	switch id {
 	case viewPassword:
-		return []helpEntry{
-			{"enter", "submit"},
-			{"tab", "next field"},
-			{"ctrl+c", "quit"},
+		return []zstyle.HelpPair{
+			{Key: "enter", Desc: "submit"},
+			{Key: "tab", Desc: "next field"},
+			{Key: "ctrl+c", Desc: "quit"},
 		}
 	case viewMenu:
-		return []helpEntry{
-			{"↑/k", "up"},
-			{"↓/j", "down"},
-			{"enter", "select"},
-			{"q", "quit"},
+		return []zstyle.HelpPair{
+			{Key: "↑/k", Desc: "up"},
+			{Key: "↓/j", Desc: "down"},
+			{Key: "enter", Desc: "select"},
+			{Key: "q", Desc: "quit"},
 		}
 	case viewSecretList:
-		return []helpEntry{
-			{"↑/k", "up"},
-			{"↓/j", "down"},
-			{"enter", "open"},
-			{"n", "new"},
-			{"d", "delete"},
-			{"/", "search"},
-			{"tab", "filter"},
-			{"esc", "back"},
+		return []zstyle.HelpPair{
+			{Key: "↑/k", Desc: "up"},
+			{Key: "↓/j", Desc: "down"},
+			{Key: "enter", Desc: "open"},
+			{Key: "n", Desc: "new"},
+			{Key: "d", Desc: "delete"},
+			{Key: "/", Desc: "search"},
+			{Key: "tab", Desc: "filter"},
+			{Key: "esc", Desc: "back"},
 		}
 	case viewSecretDetail:
-		return []helpEntry{
-			{"↑/k", "up"},
-			{"↓/j", "down"},
-			{"c", "copy"},
-			{"s", "show/hide"},
-			{"e", "edit"},
-			{"d", "delete"},
-			{"esc", "back"},
+		return []zstyle.HelpPair{
+			{Key: "↑/k", Desc: "up"},
+			{Key: "↓/j", Desc: "down"},
+			{Key: "c", Desc: "copy"},
+			{Key: "s", Desc: "show/hide"},
+			{Key: "e", Desc: "edit"},
+			{Key: "d", Desc: "delete"},
+			{Key: "esc", Desc: "back"},
 		}
 	case viewSecretForm:
-		return []helpEntry{
-			{"tab", "next"},
-			{"shift+tab", "prev"},
-			{"ctrl+s", "save"},
-			{"esc", "cancel"},
+		return []zstyle.HelpPair{
+			{Key: "tab", Desc: "next"},
+			{Key: "shift+tab", Desc: "prev"},
+			{Key: "ctrl+s", Desc: "save"},
+			{Key: "esc", Desc: "cancel"},
 		}
 	case viewTaskList:
-		return []helpEntry{
-			{"↑/k", "up"},
-			{"↓/j", "down"},
-			{"enter", "detail"},
-			{"n", "new"},
-			{"space", "toggle done"},
-			{"d", "delete"},
-			{"x", "clear done"},
-			{"tab", "filter"},
-			{"esc", "back"},
+		return []zstyle.HelpPair{
+			{Key: "↑/k", Desc: "up"},
+			{Key: "↓/j", Desc: "down"},
+			{Key: "enter", Desc: "detail"},
+			{Key: "n", Desc: "new"},
+			{Key: "space", Desc: "toggle done"},
+			{Key: "d", Desc: "delete"},
+			{Key: "x", Desc: "clear done"},
+			{Key: "tab", Desc: "filter"},
+			{Key: "esc", Desc: "back"},
 		}
 	case viewTaskDetail:
-		return []helpEntry{
-			{"e", "edit"},
-			{"space", "toggle done"},
-			{"d", "delete"},
-			{"esc", "back"},
+		return []zstyle.HelpPair{
+			{Key: "e", Desc: "edit"},
+			{Key: "space", Desc: "toggle done"},
+			{Key: "d", Desc: "delete"},
+			{Key: "esc", Desc: "back"},
 		}
 	case viewTaskForm:
-		return []helpEntry{
-			{"tab", "next field"},
-			{"ctrl+s", "save"},
-			{"esc", "cancel"},
+		return []zstyle.HelpPair{
+			{Key: "tab", Desc: "next field"},
+			{Key: "ctrl+s", Desc: "save"},
+			{Key: "esc", Desc: "cancel"},
 		}
 	default:
-		return []helpEntry{
-			{"q", "quit"},
+		return []zstyle.HelpPair{
+			{Key: "q", Desc: "quit"},
 		}
 	}
 }

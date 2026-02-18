@@ -111,26 +111,39 @@ func TestSecretFormTabNavigation(t *testing.T) {
 	m := newSecretForm()
 	m = m.initForCreate()
 
-	if m.focused != 0 {
-		t.Fatalf("focused = %d, want 0", m.focused)
+	// initial focus is on type selector (-1)
+	if m.focused != -1 {
+		t.Fatalf("focused = %d, want -1", m.focused)
 	}
 
-	// tab moves to next field
+	// tab from type selector (-1) moves to first input (0)
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	if m.focused != 0 {
+		t.Fatalf("focused = %d, want 0 after tab from type selector", m.focused)
+	}
+
+	// tab from 0 moves to 1
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
 	if m.focused != 1 {
 		t.Fatalf("focused = %d, want 1 after tab", m.focused)
 	}
 
-	// shift+tab moves back
+	// shift+tab from 1 moves back to 0
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyShiftTab})
 	if m.focused != 0 {
 		t.Fatalf("focused = %d, want 0 after shift+tab", m.focused)
 	}
 
-	// shift+tab at 0 stays at 0
+	// shift+tab from 0 goes back to type selector (-1)
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyShiftTab})
-	if m.focused != 0 {
-		t.Fatalf("focused = %d, want 0 (bounded)", m.focused)
+	if m.focused != -1 {
+		t.Fatalf("focused = %d, want -1 after shift+tab from 0", m.focused)
+	}
+
+	// shift+tab at -1 stays at -1 (bounded)
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyShiftTab})
+	if m.focused != -1 {
+		t.Fatalf("focused = %d, want -1 (bounded)", m.focused)
 	}
 }
 
