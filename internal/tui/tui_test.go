@@ -68,14 +68,31 @@ func TestCtrlCQuitsFromMenu(t *testing.T) {
 	}
 }
 
-func TestQQuitsFromPlaceholder(t *testing.T) {
-	views := []viewID{viewSecretList, viewSecretDetail, viewSecretForm, viewTaskList, viewTaskDetail, viewTaskForm}
+func TestQQuitsFromNonInputViews(t *testing.T) {
+	// views without text inputs: q quits
+	views := []viewID{viewSecretList, viewSecretDetail, viewTaskList, viewTaskDetail}
 	for _, v := range views {
 		m := newTestModel()
 		m.view = v
 		_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
 		if cmd == nil {
 			t.Fatalf("q should return quit command from view %d", v)
+		}
+	}
+}
+
+func TestQDoesNotQuitFromFormViews(t *testing.T) {
+	// views with text inputs: q types, does not quit
+	views := []viewID{viewSecretForm, viewTaskForm}
+	for _, v := range views {
+		m := newTestModel()
+		m.view = v
+		_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
+		if cmd != nil {
+			msg := cmd()
+			if _, ok := msg.(tea.QuitMsg); ok {
+				t.Fatalf("q should not quit from form view %d (text input)", v)
+			}
 		}
 	}
 }

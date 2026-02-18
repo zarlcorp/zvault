@@ -20,14 +20,14 @@ type Model struct {
 	version string
 
 	// sub-view models
-	password       passwordModel
-	menu           menuModel
-	secretList     placeholderModel
-	secretDetail   placeholderModel
-	secretForm     placeholderModel
-	taskList       placeholderModel
-	taskDetail     placeholderModel
-	taskForm       placeholderModel
+	password     passwordModel
+	menu         menuModel
+	secretList   placeholderModel
+	secretDetail placeholderModel
+	secretForm   placeholderModel
+	taskList     taskListModel
+	taskDetail   taskDetailModel
+	taskForm     taskFormModel
 
 	width  int
 	height int
@@ -45,9 +45,9 @@ func New(version string) Model {
 		secretList:   newPlaceholder(viewSecretList),
 		secretDetail: newPlaceholder(viewSecretDetail),
 		secretForm:   newPlaceholder(viewSecretForm),
-		taskList:     newPlaceholder(viewTaskList),
-		taskDetail:   newPlaceholder(viewTaskDetail),
-		taskForm:     newPlaceholder(viewTaskForm),
+		taskList:     newTaskListModel(nil),
+		taskDetail:   newTaskDetailModel(nil),
+		taskForm:     newTaskFormModel(nil),
 	}
 }
 
@@ -61,9 +61,9 @@ func NewWithDir(version, vaultDir string) Model {
 		secretList:   newPlaceholder(viewSecretList),
 		secretDetail: newPlaceholder(viewSecretDetail),
 		secretForm:   newPlaceholder(viewSecretForm),
-		taskList:     newPlaceholder(viewTaskList),
-		taskDetail:   newPlaceholder(viewTaskDetail),
-		taskForm:     newPlaceholder(viewTaskForm),
+		taskList:     newTaskListModel(nil),
+		taskDetail:   newTaskDetailModel(nil),
+		taskForm:     newTaskFormModel(nil),
 	}
 }
 
@@ -86,12 +86,28 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.view == viewMenu && m.vault != nil {
 			m.menu = m.menu.refreshCounts(m.vault)
 		}
+		// propagate navigateMsg to target sub-view so it can load data
+		switch msg.view {
+		case viewTaskList:
+			m.taskList.vault = m.vault
+			m.taskList, _ = m.taskList.Update(msg)
+		case viewTaskDetail:
+			m.taskDetail.vault = m.vault
+			m.taskDetail, _ = m.taskDetail.Update(msg)
+		case viewTaskForm:
+			m.taskForm.vault = m.vault
+			m.taskForm, _ = m.taskForm.Update(msg)
+		}
 		return m, nil
 
 	case vaultOpenedMsg:
 		m.vault = msg.vault
 		m.view = viewMenu
 		m.menu = m.menu.refreshCounts(msg.vault)
+		// propagate vault to task views
+		m.taskList.vault = msg.vault
+		m.taskDetail.vault = msg.vault
+		m.taskForm.vault = msg.vault
 		return m, nil
 
 	case errMsg:
@@ -105,13 +121,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		// global quit: q or ctrl+c, but not when typing in text inputs
-		if m.view != viewPassword {
-			if key.Matches(msg, zstyle.KeyQuit) {
+		if hasTextInput(m.view) {
+			// views with text inputs: only ctrl+c quits
+			if msg.Type == tea.KeyCtrlC {
 				return m, tea.Quit
 			}
 		} else {
-			// in password view, only ctrl+c quits
-			if msg.Type == tea.KeyCtrlC {
+			if key.Matches(msg, zstyle.KeyQuit) {
 				return m, tea.Quit
 			}
 		}
@@ -223,6 +239,11 @@ func (m Model) propagateSize() Model {
 
 // CurrentView returns the active view ID (exported for testing).
 func (m Model) CurrentView() viewID { return m.view }
+
+// hasTextInput returns true for views where typing 'q' should input text, not quit.
+func hasTextInput(v viewID) bool {
+	return v == viewPassword || v == viewTaskForm || v == viewSecretForm
+}
 
 // pendingFilter returns a task filter for pending tasks.
 func pendingFilter() task.Filter {
