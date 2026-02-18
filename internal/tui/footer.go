@@ -55,7 +55,18 @@ func helpFor(id viewID) []helpEntry {
 			{"enter", "select"},
 			{"q", "quit"},
 		}
-	case viewSecretList, viewTaskList:
+	case viewSecretList:
+		return []helpEntry{
+			{"↑/k", "up"},
+			{"↓/j", "down"},
+			{"enter", "open"},
+			{"n", "new"},
+			{"d", "delete"},
+			{"/", "search"},
+			{"tab", "filter"},
+			{"esc", "back"},
+		}
+	case viewTaskList:
 		return []helpEntry{
 			{"↑/k", "up"},
 			{"↓/j", "down"},
@@ -63,12 +74,29 @@ func helpFor(id viewID) []helpEntry {
 			{"esc", "back"},
 			{"q", "quit"},
 		}
-	case viewSecretDetail, viewTaskDetail:
+	case viewSecretDetail:
+		return []helpEntry{
+			{"↑/k", "up"},
+			{"↓/j", "down"},
+			{"c", "copy"},
+			{"s", "show/hide"},
+			{"e", "edit"},
+			{"d", "delete"},
+			{"esc", "back"},
+		}
+	case viewTaskDetail:
 		return []helpEntry{
 			{"esc", "back"},
 			{"q", "quit"},
 		}
-	case viewSecretForm, viewTaskForm:
+	case viewSecretForm:
+		return []helpEntry{
+			{"tab", "next"},
+			{"shift+tab", "prev"},
+			{"ctrl+s", "save"},
+			{"esc", "cancel"},
+		}
+	case viewTaskForm:
 		return []helpEntry{
 			{"tab", "next field"},
 			{"enter", "save"},
