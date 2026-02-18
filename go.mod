@@ -9,6 +9,7 @@ require (
 	github.com/zarlcorp/core/pkg/zfilesystem v0.3.0
 	github.com/zarlcorp/core/pkg/zstore v0.1.0
 	github.com/zarlcorp/core/pkg/zstyle v0.1.0
+	golang.org/x/term v0.40.0
 )
 
 require (
