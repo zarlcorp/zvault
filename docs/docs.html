@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>zvault — Documentation</title>
-  <meta name="description" content="Planned CLI commands and usage for zvault.">
+  <meta name="description" content="CLI command reference for zvault.">
   <link rel="stylesheet" href="https://zarlcorp.github.io/shared.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -23,61 +23,183 @@
       <div class="window-title">zvault docs</div>
       <div class="window-content">
         <div class="doc-content">
-          <blockquote>These commands are planned &mdash; zvault is not yet released. This page documents the intended CLI interface.</blockquote>
+          <p>zvault provides an interactive TUI and a scriptable CLI. Run <code>zvault</code> with no arguments to launch the TUI, or use subcommands for automation.</p>
+          <pre><code>zvault &lt;command&gt; [args]
+
+Commands:
+  secret      manage secrets
+  task        manage tasks
+  export      export vault data
+  completion  generate shell completions
+  version     print version
+  help        show help</code></pre>
         </div>
       </div>
     </div>
 
     <div class="window">
-      <div class="window-title">zvault init</div>
+      <div class="window-title">zvault secret store</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Initialize a new encrypted vault. Creates the vault directory and sets your master password.</p>
-          <pre><code>$ zvault init</code></pre>
-          <p>You'll be prompted to create a master password. The password is used with Argon2id to derive your encryption key. The vault stores all data locally in <code>~/.local/share/zvault/</code>.</p>
+          <p>Create a new secret. You will be prompted for the secret value interactively.</p>
+          <pre><code>zvault secret store -t &lt;type&gt; -n &lt;name&gt; [--tags tag1,tag2]</code></pre>
+          <p>Supported types: <code>password</code>, <code>apikey</code>, <code>sshkey</code>, <code>note</code>.</p>
+          <p>For notes, you can pipe content via stdin:</p>
+          <pre><code>echo "my note" | zvault secret store -t note -n mynote</code></pre>
         </div>
       </div>
     </div>
 
     <div class="window">
-      <div class="window-title">zvault store</div>
+      <div class="window-title">zvault secret get</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Store a new secret in the vault. Prompts for the secret value and encrypts it with age encryption.</p>
-          <pre><code>$ zvault store &lt;name&gt;</code></pre>
-          <p>The name is the key used to retrieve the secret later. If a secret with that name already exists, it will be overwritten.</p>
+          <p>Retrieve a secret by ID, name, or ID prefix. Sensitive values are masked by default.</p>
+          <pre><code>zvault secret get &lt;id-or-name&gt; [--show]</code></pre>
+          <p>Use <code>--show</code> to reveal sensitive values like passwords and API keys.</p>
         </div>
       </div>
     </div>
 
     <div class="window">
-      <div class="window-title">zvault get</div>
+      <div class="window-title">zvault secret list</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Retrieve a secret from the vault. Prints the decrypted value to stdout.</p>
-          <pre><code>$ zvault get &lt;name&gt;</code></pre>
-          <p>Useful for scripting and piping into other commands. Requires master password authentication.</p>
+          <p>List all stored secrets. Optionally filter by type or tag.</p>
+          <pre><code>zvault secret list [-t &lt;type&gt;] [--tag &lt;tag&gt;]</code></pre>
         </div>
       </div>
     </div>
 
     <div class="window">
-      <div class="window-title">zvault list</div>
+      <div class="window-title">zvault secret delete</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>List all stored secrets. Shows names without revealing values.</p>
-          <pre><code>$ zvault list</code></pre>
+          <p>Delete a secret. Prompts for confirmation before deleting.</p>
+          <pre><code>zvault secret delete &lt;id-or-name&gt;</code></pre>
         </div>
       </div>
     </div>
 
     <div class="window">
-      <div class="window-title">zvault delete</div>
+      <div class="window-title">zvault secret search</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Permanently remove a secret from the vault.</p>
-          <pre><code>$ zvault delete &lt;name&gt;</code></pre>
-          <p>This action is irreversible. The encrypted data is securely erased from disk.</p>
+          <p>Search secrets by name.</p>
+          <pre><code>zvault secret search &lt;query&gt;</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="window-title">zvault task add</div>
+      <div class="window-content">
+        <div class="doc-content">
+          <p>Add a new task with optional priority, due date, and tags.</p>
+          <pre><code>zvault task add [-p &lt;h|m|l&gt;] [-d &lt;date&gt;] [--tags tag1,tag2] &lt;title&gt;</code></pre>
+          <p>Due date formats: <code>YYYY-MM-DD</code>, <code>today</code>, <code>tomorrow</code>, <code>next week</code>, <code>+3d</code>.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="window-title">zvault task list</div>
+      <div class="window-content">
+        <div class="doc-content">
+          <p>List tasks. Filter by status, priority, or tag.</p>
+          <pre><code>zvault task list [--pending] [--done] [-p &lt;h|m|l&gt;] [--tag &lt;tag&gt;]</code></pre>
+          <p>Alias: <code>zvault task ls</code></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="window-title">zvault task done</div>
+      <div class="window-content">
+        <div class="doc-content">
+          <p>Mark one or more tasks as complete.</p>
+          <pre><code>zvault task done &lt;id&gt;
+zvault task done &lt;id1&gt;,&lt;id2&gt;</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="window-title">zvault task edit</div>
+      <div class="window-content">
+        <div class="doc-content">
+          <p>Rename a task.</p>
+          <pre><code>zvault task edit &lt;id&gt; &lt;new title&gt;</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="window-title">zvault task rm</div>
+      <div class="window-content">
+        <div class="doc-content">
+          <p>Delete one or more tasks.</p>
+          <pre><code>zvault task rm &lt;id&gt;
+zvault task rm &lt;id1&gt;,&lt;id2&gt;</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="window-title">zvault task clear</div>
+      <div class="window-content">
+        <div class="doc-content">
+          <p>Delete all completed tasks.</p>
+          <pre><code>zvault task clear</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="window-title">zvault export</div>
+      <div class="window-content">
+        <div class="doc-content">
+          <p>Export vault data as markdown. By default exports both secrets and tasks.</p>
+          <pre><code>zvault export [--tasks] [--secrets] [--pending] [--done]</code></pre>
+          <p>Use <code>--tasks</code> or <code>--secrets</code> to export only one category. Use <code>--pending</code> or <code>--done</code> to filter tasks by status.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="window-title">zvault completion</div>
+      <div class="window-content">
+        <div class="doc-content">
+          <p>Generate shell completion scripts.</p>
+          <pre><code># bash (add to ~/.bashrc)
+eval "$(zvault completion bash)"
+
+# zsh (add to ~/.zshrc)
+eval "$(zvault completion zsh)"
+
+# fish (add to ~/.config/fish/config.fish)
+zvault completion fish | source</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="window-title">zvault version</div>
+      <div class="window-content">
+        <div class="doc-content">
+          <p>Print the zvault version.</p>
+          <pre><code>zvault version</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="window-title">configuration</div>
+      <div class="window-content">
+        <div class="doc-content">
+          <p>zvault stores its encrypted vault in <code>~/.local/share/zvault/</code>. The vault is initialized on first use via the TUI.</p>
+          <p>Set the <code>ZVAULT_PASSWORD</code> environment variable to skip interactive password prompts (useful for scripting).</p>
+          <p>Set <code>NO_COLOR</code> to disable colored output.</p>
         </div>
       </div>
     </div>

@@ -4,21 +4,6 @@
 /* tool accent — mauve */
 :root { --accent: var(--mauve); }
 
-/* coming soon indicator */
-
-.status-badge {
-  display: inline-block;
-  font-size: 0.7rem;
-  color: var(--overlay1);
-  border: 1px solid var(--surface1);
-  border-radius: 4px;
-  padding: 0.2rem 0.65rem;
-  margin-top: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 500;
-}
-
 /* features */
 
 .features {
