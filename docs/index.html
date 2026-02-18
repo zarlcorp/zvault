@@ -23,20 +23,60 @@
       <header class="hero">
         <div class="logo">zvault</div>
         <div class="tagline">encrypted local storage for secrets, keys, notes. your data, your machine, your keys.</div>
-        <div class="status-badge">coming soon</div>
       </header>
 
       <section class="features">
         <div class="window">
-          <div class="window-title">planned features</div>
+          <div class="window-title">features</div>
           <div class="window-content">
             <ul class="feature-list">
               <li>encrypted local vault with age encryption</li>
               <li>key management and secret storage</li>
               <li>secure notes with full-text search</li>
               <li>interactive TUI + scriptable CLI</li>
+              <li>task tracking with priorities and due dates</li>
+              <li>export to markdown, JSON, CSV</li>
               <li>single binary, no cloud, no accounts</li>
             </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="features">
+        <div class="window">
+          <div class="window-title">install</div>
+          <div class="window-content">
+            <div class="doc-content">
+              <p>via homebrew:</p>
+              <pre><code>brew install zarlcorp/tap/zvault</code></pre>
+              <p>via go:</p>
+              <pre><code>go install github.com/zarlcorp/zvault/cmd/zvault@latest</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="features">
+        <div class="window">
+          <div class="window-title">quickstart</div>
+          <div class="window-content">
+            <div class="doc-content">
+              <p>launch the interactive TUI:</p>
+              <pre><code>zvault</code></pre>
+              <p>or use the CLI directly:</p>
+              <pre><code># store a password
+zvault secret store -t password -n github
+
+# add a task
+zvault task add -p h -d tomorrow "deploy to prod"
+
+# list secrets
+zvault secret list
+
+# search
+zvault secret search github</code></pre>
+              <p>see the <a href="docs.html">full documentation</a> for all commands.</p>
+            </div>
           </div>
         </div>
       </section>
