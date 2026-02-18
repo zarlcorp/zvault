@@ -374,33 +374,6 @@ func TestFooterRendering(t *testing.T) {
 	}
 }
 
-func TestPlaceholderView(t *testing.T) {
-	p := newPlaceholder(viewSecretList)
-	view := p.View()
-	if !strings.Contains(view, "Secrets") {
-		t.Error("placeholder should contain view title")
-	}
-	if !strings.Contains(view, "coming soon") {
-		t.Error("placeholder should contain 'coming soon'")
-	}
-}
-
-func TestPlaceholderEscNavigatesBack(t *testing.T) {
-	p := newPlaceholder(viewSecretList)
-	_, cmd := p.Update(tea.KeyMsg{Type: tea.KeyEscape})
-	if cmd == nil {
-		t.Fatal("esc should produce a navigate command")
-	}
-	msg := cmd()
-	nav, ok := msg.(navigateMsg)
-	if !ok {
-		t.Fatalf("expected navigateMsg, got %T", msg)
-	}
-	if nav.view != viewMenu {
-		t.Fatalf("nav view = %d, want viewMenu (%d)", nav.view, viewMenu)
-	}
-}
-
 func TestAllViewsRender(t *testing.T) {
 	views := []viewID{
 		viewPassword, viewMenu,
