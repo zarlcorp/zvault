@@ -309,7 +309,7 @@ func (m secretListModel) View() string {
 		s := m.secrets[m.cursor]
 		warn := lipgloss.NewStyle().Foreground(zstyle.Warning)
 		b.WriteString("\n")
-		b.WriteString(warn.Render(fmt.Sprintf("  Delete '%s'? (y/n)", s.Name)))
+		b.WriteString(warn.Render(fmt.Sprintf("  delete '%s'? (y/n)", s.Name)))
 		b.WriteString("\n")
 	}
 

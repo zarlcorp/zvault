@@ -122,7 +122,7 @@ func (m secretDetailModel) Update(msg tea.Msg) (secretDetailModel, tea.Cmd) {
 		return m, nil
 
 	case clipboardCopiedMsg:
-		m.clipboardMsg = fmt.Sprintf("Copied %s! (clears in 10s)", msg.field)
+		m.clipboardMsg = fmt.Sprintf("copied %s (clears in 10s)", msg.field)
 		return m, nil
 
 	case clipboardClearedMsg:
@@ -221,7 +221,7 @@ func (m secretDetailModel) View() string {
 	if m.confirmDelete {
 		warn := lipgloss.NewStyle().Foreground(zstyle.Warning)
 		b.WriteString("\n")
-		b.WriteString(warn.Render(fmt.Sprintf("  Delete '%s'? (y/n)", m.secret.Name)))
+		b.WriteString(warn.Render(fmt.Sprintf("  delete '%s'? (y/n)", m.secret.Name)))
 		b.WriteString("\n")
 	}
 

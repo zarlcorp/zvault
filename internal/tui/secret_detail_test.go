@@ -138,7 +138,7 @@ func TestSecretDetailDeleteConfirmView(t *testing.T) {
 	m.confirmDelete = true
 
 	view := m.View()
-	if !strings.Contains(view, "Delete 'MyPass'? (y/n)") {
+	if !strings.Contains(view, "delete 'MyPass'? (y/n)") {
 		t.Error("delete confirmation should show secret name")
 	}
 }
@@ -170,8 +170,8 @@ func TestSecretDetailClipboardMsg(t *testing.T) {
 	m.secretID = "test"
 
 	m, _ = m.Update(clipboardCopiedMsg{field: "password"})
-	if !strings.Contains(m.clipboardMsg, "Copied password") {
-		t.Fatalf("clipboardMsg = %q, want 'Copied password...'", m.clipboardMsg)
+	if !strings.Contains(m.clipboardMsg, "copied password") {
+		t.Fatalf("clipboardMsg = %q, want 'copied password...'", m.clipboardMsg)
 	}
 
 	m, _ = m.Update(clipboardClearedMsg{})

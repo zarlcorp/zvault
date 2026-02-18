@@ -337,7 +337,7 @@ func TestTaskListDeleteConfirmation(t *testing.T) {
 		t.Fatal("should be in delete confirmation")
 	}
 	view := m.View()
-	if !strings.Contains(view, "Delete") {
+	if !strings.Contains(view, "delete") {
 		t.Error("should show delete prompt")
 	}
 
@@ -377,7 +377,7 @@ func TestTaskListClearDone(t *testing.T) {
 		t.Fatal("should be in clear-done confirmation")
 	}
 	view := m.View()
-	if !strings.Contains(view, "Clear 2 done") {
+	if !strings.Contains(view, "clear 2 done") {
 		t.Errorf("should show count in clear prompt, got: %s", view)
 	}
 

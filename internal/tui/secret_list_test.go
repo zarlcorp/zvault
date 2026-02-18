@@ -203,7 +203,7 @@ func TestSecretListDeleteConfirmView(t *testing.T) {
 	m.confirmDelete = true
 
 	view := m.View()
-	if !strings.Contains(view, "Delete 'MySecret'? (y/n)") {
+	if !strings.Contains(view, "delete 'MySecret'? (y/n)") {
 		t.Error("delete confirmation should show secret name")
 	}
 }

@@ -143,7 +143,7 @@ func TestTaskDetailDeleteConfirm(t *testing.T) {
 	}
 
 	view := m.View()
-	if !strings.Contains(view, "Delete") {
+	if !strings.Contains(view, "delete") {
 		t.Error("should show delete prompt")
 	}
 

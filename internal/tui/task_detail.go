@@ -192,7 +192,7 @@ func (m taskDetailModel) View() string {
 	// confirmation prompt
 	if m.confirm == confirmDelete {
 		b.WriteString(fmt.Sprintf("\n  %s\n",
-			zstyle.StatusWarn.Render(fmt.Sprintf("Delete \"%s\"? (y/n)", m.task.Title))))
+			zstyle.StatusWarn.Render(fmt.Sprintf("delete \"%s\"? (y/n)", m.task.Title))))
 	}
 
 	return b.String()
