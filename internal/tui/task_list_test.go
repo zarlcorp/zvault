@@ -499,3 +499,184 @@ func TestTaskListCursorClamps(t *testing.T) {
 		t.Fatalf("cursor = %d, but only %d tasks remain", m.cursor, len(m.tasks))
 	}
 }
+
+func TestTaskListFilterCyclingWithTags(t *testing.T) {
+	v := openTestVault(t)
+	addTask(t, v, "Work task", withTags("work"))
+	addTask(t, v, "Home task", withTags("home"))
+
+	m := newTaskListModel(v)
+
+	// initial: all
+	if m.filter != taskFilterAll {
+		t.Fatalf("initial filter = %d, want taskFilterAll", m.filter)
+	}
+
+	// tab -> pending
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	if m.filter != taskFilterPending {
+		t.Fatalf("after 1 tab: filter = %d, want taskFilterPending", m.filter)
+	}
+
+	// tab -> done
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	if m.filter != taskFilterDone {
+		t.Fatalf("after 2 tabs: filter = %d, want taskFilterDone", m.filter)
+	}
+
+	// tab -> by tag (first tag)
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	if m.filter != taskFilterByTag {
+		t.Fatalf("after 3 tabs: filter = %d, want taskFilterByTag", m.filter)
+	}
+	if m.tagIndex != 0 {
+		t.Fatalf("tagIndex = %d, want 0", m.tagIndex)
+	}
+
+	// tab -> by tag (second tag)
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	if m.filter != taskFilterByTag {
+		t.Fatalf("after 4 tabs: filter = %d, want taskFilterByTag", m.filter)
+	}
+	if m.tagIndex != 1 {
+		t.Fatalf("tagIndex = %d, want 1", m.tagIndex)
+	}
+
+	// tab -> wraps back to all (past last tag)
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	if m.filter != taskFilterAll {
+		t.Fatalf("after 5 tabs: filter = %d, want taskFilterAll", m.filter)
+	}
+}
+
+func TestTaskListFilterSkipsTagModeNoTags(t *testing.T) {
+	v := openTestVault(t)
+	addTask(t, v, "No tags task")
+
+	m := newTaskListModel(v)
+
+	// all -> pending -> done -> all (should skip tag mode)
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab}) // pending
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab}) // done
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab}) // should skip to all
+	if m.filter != taskFilterAll {
+		t.Fatalf("after 3 tabs with no tags: filter = %d, want taskFilterAll", m.filter)
+	}
+}
+
+func TestTaskListTagCycling(t *testing.T) {
+	v := openTestVault(t)
+	addTask(t, v, "A", withTags("alpha"))
+	addTask(t, v, "B", withTags("beta"))
+	addTask(t, v, "C", withTags("gamma"))
+
+	m := newTaskListModel(v)
+
+	// advance to tag mode: all -> pending -> done -> byTag
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+
+	if m.filter != taskFilterByTag {
+		t.Fatalf("filter = %d, want taskFilterByTag", m.filter)
+	}
+
+	// tags are sorted: alpha, beta, gamma
+	wantTags := []string{"alpha", "beta", "gamma"}
+	for i, want := range wantTags {
+		if m.tagIndex != i {
+			t.Fatalf("tagIndex = %d, want %d", m.tagIndex, i)
+		}
+		if len(m.tags) <= i || m.tags[m.tagIndex] != want {
+			t.Fatalf("tag = %q, want %q", m.tags[m.tagIndex], want)
+		}
+		if i < len(wantTags)-1 {
+			m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+		}
+	}
+
+	// one more tab wraps to all
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	if m.filter != taskFilterAll {
+		t.Fatalf("after cycling all tags: filter = %d, want taskFilterAll", m.filter)
+	}
+}
+
+func TestTaskListFilterLabelByTag(t *testing.T) {
+	v := openTestVault(t)
+	addTask(t, v, "Tagged", withTags("work", "urgent"))
+
+	m := newTaskListModel(v)
+
+	// advance to tag mode
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab}) // pending
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab}) // done
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab}) // byTag (first tag)
+
+	// tags sorted: urgent, work
+	label := m.filterLabel()
+	if label != "Filter: #urgent" {
+		t.Fatalf("label = %q, want %q", label, "Filter: #urgent")
+	}
+
+	// cycle to next tag
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	label = m.filterLabel()
+	if label != "Filter: #work" {
+		t.Fatalf("label = %q, want %q", label, "Filter: #work")
+	}
+}
+
+func TestTaskListFilterByTagShowsMatchingTasks(t *testing.T) {
+	v := openTestVault(t)
+	addTask(t, v, "Work task 1", withTags("work"))
+	addTask(t, v, "Home task", withTags("home"))
+	addTask(t, v, "Work task 2", withTags("work"))
+	addTask(t, v, "Untagged task")
+
+	m := newTaskListModel(v)
+
+	// all tasks visible initially
+	if len(m.tasks) != 4 {
+		t.Fatalf("all: len = %d, want 4", len(m.tasks))
+	}
+
+	// advance to tag mode: all -> pending -> done -> byTag
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+
+	// tags sorted: home, work — first tag is "home"
+	if m.filter != taskFilterByTag {
+		t.Fatalf("filter = %d, want taskFilterByTag", m.filter)
+	}
+	if len(m.tags) == 0 {
+		t.Fatal("no tags collected")
+	}
+	if m.tags[m.tagIndex] != "home" {
+		t.Fatalf("first tag = %q, want 'home'", m.tags[m.tagIndex])
+	}
+	if len(m.tasks) != 1 {
+		t.Fatalf("home filter: len = %d, want 1", len(m.tasks))
+	}
+	if m.tasks[0].Title != "Home task" {
+		t.Fatalf("home filter: task = %q, want 'Home task'", m.tasks[0].Title)
+	}
+
+	// tab to next tag: "work"
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	if m.tags[m.tagIndex] != "work" {
+		t.Fatalf("second tag = %q, want 'work'", m.tags[m.tagIndex])
+	}
+	if len(m.tasks) != 2 {
+		t.Fatalf("work filter: len = %d, want 2", len(m.tasks))
+	}
+
+	workTitles := make(map[string]bool)
+	for _, tk := range m.tasks {
+		workTitles[tk.Title] = true
+	}
+	if !workTitles["Work task 1"] || !workTitles["Work task 2"] {
+		t.Fatalf("work filter: tasks = %v, want Work task 1 and Work task 2", m.tasks)
+	}
+}

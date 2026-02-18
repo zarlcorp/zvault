@@ -20,6 +20,7 @@ const (
 	taskFilterAll filterMode = iota
 	taskFilterPending
 	taskFilterDone
+	taskFilterByTag
 	taskFilterCount // sentinel
 )
 
@@ -90,11 +91,11 @@ func (m *taskListModel) loadTasks() {
 }
 
 func (m *taskListModel) collectTags() {
-	seen := make(map[string]bool)
+	m.tags = nil
 	if m.vault == nil {
-		m.tags = nil
 		return
 	}
+	seen := make(map[string]bool)
 	all, err := m.vault.Tasks().List(task.Filter{})
 	if err != nil {
 		return
@@ -110,12 +111,41 @@ func (m *taskListModel) collectTags() {
 	sort.Strings(m.tags)
 }
 
+// advanceFilter moves to the next filter mode. When in tag mode, tab cycles
+// through tags first; after the last tag it wraps to All. If no tags exist,
+// tag mode is skipped entirely.
+func (m *taskListModel) advanceFilter() {
+	if m.filter == taskFilterByTag {
+		// cycle through tags; wrap to All after last
+		m.tagIndex++
+		if m.tagIndex >= len(m.tags) {
+			m.tagIndex = 0
+			m.filter = taskFilterAll
+		}
+		return
+	}
+
+	next := (m.filter + 1) % taskFilterCount
+	if next == taskFilterByTag && len(m.tags) == 0 {
+		next = taskFilterAll
+	}
+	if next == taskFilterByTag {
+		m.tagIndex = 0
+	}
+	m.filter = next
+}
+
 func (m taskListModel) taskFilter() task.Filter {
 	switch m.filter {
 	case taskFilterPending:
 		return task.Filter{Status: task.FilterPending}
 	case taskFilterDone:
 		return task.Filter{Status: task.FilterDone}
+	case taskFilterByTag:
+		if len(m.tags) > 0 {
+			return task.Filter{Tag: m.tags[m.tagIndex]}
+		}
+		return task.Filter{}
 	default:
 		return task.Filter{}
 	}
@@ -229,7 +259,7 @@ func (m taskListModel) Update(msg tea.Msg) (taskListModel, tea.Cmd) {
 			}
 
 		case key.Matches(msg, zstyle.KeyTab):
-			m.filter = (m.filter + 1) % taskFilterCount
+			m.advanceFilter()
 			m.loadTasks()
 		}
 	}
@@ -372,6 +402,11 @@ func (m taskListModel) filterLabel() string {
 		return "Filter: Pending"
 	case taskFilterDone:
 		return "Filter: Done"
+	case taskFilterByTag:
+		if len(m.tags) > 0 {
+			return "Filter: #" + m.tags[m.tagIndex]
+		}
+		return "Filter: All"
 	default:
 		return "Filter: All"
 	}

@@ -1,36 +1,28 @@
-# Agent State: 049-zvault-tui-tasks
+# Agent State: 049-zvault-tui-tasks (By Tag Filter Fix)
 
 **Status:** done
 **Exit:** success
-**Started:** 2026-02-18T00:00:00Z
-**Updated:** 2026-02-18T00:30:00Z
+**Started:** 2026-02-18T00:30:00Z
+**Updated:** 2026-02-18T00:45:00Z
 
 ## Acceptance Criteria
-- [x] Task list view with checkbox, priority, title, due date, tags
-- [x] Priority indicators (!! high, ! medium) with color coding
-- [x] Dim done tasks with strikethrough
-- [x] Overdue dates in red
-- [x] Sort: pending first, then priority, then due date
-- [x] Filter cycling (all/pending/done/tag) via tab
-- [x] Toggle done with space (immediate)
-- [x] Task detail with relative date display
-- [x] Task form with title, priority selector, due date, tags
-- [x] Parse relative dates (tomorrow, +3d, next week)
-- [x] Clear-done confirmation with `x`
-- [x] Delete confirmation with `d`
-- [x] Navigate correctly between views
+- [x] Add `taskFilterByTag` constant between `taskFilterDone` and `taskFilterCount`
+- [x] `taskFilter()` returns `task.Filter{Tag: ...}` when in tag mode
+- [x] `filterLabel()` shows `"Filter: #tagname"` for tag mode
+- [x] Tab cycles through 4 modes when tags exist
+- [x] Tab skips tag mode when no tags exist
+- [x] Tag cycling within tag filter mode
+- [x] Tests: tab cycling through 4 modes when tags exist
+- [x] Tests: tab skipping tag mode when no tags exist
+- [x] Tests: tag cycling within tag filter mode
+- [x] Tests: filter label showing tag name
+- [x] Tests: filtered list only showing tasks with matching tag
+- [x] All tests pass (25 task list tests, full suite green, go vet clean)
 
 ## Log
-- Read existing codebase: tui.go, navigation.go, placeholders.go, footer.go, menu.go, password.go, task.go, vault.go
-- Created dates.go with relative date display and parsing
-- Created task_list.go with scrollable list, sort, filter, toggle, delete, clear-done
-- Created task_detail.go with full info display, toggle, delete, edit navigation
-- Created task_form.go with create/edit, priority cycling, date parsing, tag input
-- Updated tui.go: replaced placeholder fields, updated constructors, propagateSize, navigateMsg handling, vault propagation
-- Updated footer.go: task-specific help entries for list/detail/form
-- Updated tui_test.go: fixed q-quit test for form views with text inputs
-- Created dates_test.go: 15 test cases for date formatting and parsing
-- Created task_list_test.go: 20 test cases for list behavior
-- Created task_detail_test.go: 11 test cases for detail behavior
-- Created task_form_test.go: 17 test cases for form behavior
-- All 81 TUI tests pass, all project tests pass, go vet clean
+- 2026-02-18T00:30:00Z: Started. Read existing code. Plan: add taskFilterByTag constant, update filter/label methods, update tab handler for tag cycling.
+- 2026-02-18T00:35:00Z: Added taskFilterByTag constant, updated taskFilter() and filterLabel() methods.
+- 2026-02-18T00:37:00Z: Replaced simple modular tab cycling with advanceFilter() method supporting tag cycling and skip-when-empty.
+- 2026-02-18T00:38:00Z: Fixed collectTags() bug — reset m.tags to nil before rebuilding to prevent accumulation on repeated loadTasks calls.
+- 2026-02-18T00:40:00Z: Added 5 new tests covering all acceptance criteria.
+- 2026-02-18T00:45:00Z: All 25 task list tests pass, full suite green, go vet clean. Done.
