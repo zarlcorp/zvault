@@ -17,10 +17,10 @@ import (
 type filterMode int
 
 const (
-	filterAll filterMode = iota
-	filterPendingOnly
-	filterDoneOnly
-	filterModeCount // sentinel
+	taskFilterAll filterMode = iota
+	taskFilterPending
+	taskFilterDone
+	taskFilterCount // sentinel
 )
 
 // taskListModel is the task list view.
@@ -112,9 +112,9 @@ func (m *taskListModel) collectTags() {
 
 func (m taskListModel) taskFilter() task.Filter {
 	switch m.filter {
-	case filterPendingOnly:
+	case taskFilterPending:
 		return task.Filter{Status: task.FilterPending}
-	case filterDoneOnly:
+	case taskFilterDone:
 		return task.Filter{Status: task.FilterDone}
 	default:
 		return task.Filter{}
@@ -229,7 +229,7 @@ func (m taskListModel) Update(msg tea.Msg) (taskListModel, tea.Cmd) {
 			}
 
 		case key.Matches(msg, zstyle.KeyTab):
-			m.filter = (m.filter + 1) % filterModeCount
+			m.filter = (m.filter + 1) % taskFilterCount
 			m.loadTasks()
 		}
 	}
@@ -368,9 +368,9 @@ func (m taskListModel) View() string {
 
 func (m taskListModel) filterLabel() string {
 	switch m.filter {
-	case filterPendingOnly:
+	case taskFilterPending:
 		return "Filter: Pending"
-	case filterDoneOnly:
+	case taskFilterDone:
 		return "Filter: Done"
 	default:
 		return "Filter: All"

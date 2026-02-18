@@ -22,9 +22,9 @@ type Model struct {
 	// sub-view models
 	password     passwordModel
 	menu         menuModel
-	secretList   placeholderModel
-	secretDetail placeholderModel
-	secretForm   placeholderModel
+	secretList   secretListModel
+	secretDetail secretDetailModel
+	secretForm   secretFormModel
 	taskList     taskListModel
 	taskDetail   taskDetailModel
 	taskForm     taskFormModel
@@ -42,9 +42,9 @@ func New(version string) Model {
 		view:         viewPassword,
 		password:     newPasswordModel(vaultDir),
 		menu:         newMenuModel(),
-		secretList:   newPlaceholder(viewSecretList),
-		secretDetail: newPlaceholder(viewSecretDetail),
-		secretForm:   newPlaceholder(viewSecretForm),
+		secretList:   newSecretList(),
+		secretDetail: newSecretDetail(),
+		secretForm:   newSecretForm(),
 		taskList:     newTaskListModel(nil),
 		taskDetail:   newTaskDetailModel(nil),
 		taskForm:     newTaskFormModel(nil),
@@ -58,9 +58,9 @@ func NewWithDir(version, vaultDir string) Model {
 		view:         viewPassword,
 		password:     newPasswordModel(vaultDir),
 		menu:         newMenuModel(),
-		secretList:   newPlaceholder(viewSecretList),
-		secretDetail: newPlaceholder(viewSecretDetail),
-		secretForm:   newPlaceholder(viewSecretForm),
+		secretList:   newSecretList(),
+		secretDetail: newSecretDetail(),
+		secretForm:   newSecretForm(),
 		taskList:     newTaskListModel(nil),
 		taskDetail:   newTaskDetailModel(nil),
 		taskForm:     newTaskFormModel(nil),
@@ -88,6 +88,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		// propagate navigateMsg to target sub-view so it can load data
 		switch msg.view {
+		case viewSecretList:
+			m.secretList.vault = m.vault
+			m.secretList, _ = m.secretList.Update(msg)
+		case viewSecretDetail:
+			m.secretDetail.vault = m.vault
+			m.secretDetail, _ = m.secretDetail.Update(msg)
+		case viewSecretForm:
+			m.secretForm.vault = m.vault
+			m.secretForm, _ = m.secretForm.Update(msg)
 		case viewTaskList:
 			m.taskList.vault = m.vault
 			m.taskList, _ = m.taskList.Update(msg)
@@ -104,6 +113,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.vault = msg.vault
 		m.view = viewMenu
 		m.menu = m.menu.refreshCounts(msg.vault)
+		// propagate vault to secret views
+		m.secretList.vault = msg.vault
+		m.secretDetail.vault = msg.vault
+		m.secretForm.vault = msg.vault
 		// propagate vault to task views
 		m.taskList.vault = msg.vault
 		m.taskDetail.vault = msg.vault
@@ -121,8 +134,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		// global quit: q or ctrl+c, but not when typing in text inputs
-		if hasTextInput(m.view) {
-			// views with text inputs: only ctrl+c quits
+		if m.isTextInputActive() {
+			// only ctrl+c quits when a text input is focused
 			if msg.Type == tea.KeyCtrlC {
 				return m, tea.Quit
 			}
@@ -218,31 +231,42 @@ func (m Model) viewContent() string {
 }
 
 func (m Model) propagateSize() Model {
-	m.password.width = m.width
-	m.password.height = m.height
-	m.menu.width = m.width
-	m.menu.height = m.height
-	m.secretList.width = m.width
-	m.secretList.height = m.height
-	m.secretDetail.width = m.width
-	m.secretDetail.height = m.height
-	m.secretForm.width = m.width
-	m.secretForm.height = m.height
-	m.taskList.width = m.width
-	m.taskList.height = m.height
-	m.taskDetail.width = m.width
-	m.taskDetail.height = m.height
-	m.taskForm.width = m.width
-	m.taskForm.height = m.height
+	w, h := m.width, m.height
+	m.password.width = w
+	m.password.height = h
+	m.menu.width = w
+	m.menu.height = h
+	m.secretList.width = w
+	m.secretList.height = h
+	m.secretDetail.width = w
+	m.secretDetail.height = h
+	m.secretForm.width = w
+	m.secretForm.height = h
+	m.taskList.width = w
+	m.taskList.height = h
+	m.taskDetail.width = w
+	m.taskDetail.height = h
+	m.taskForm.width = w
+	m.taskForm.height = h
 	return m
 }
 
 // CurrentView returns the active view ID (exported for testing).
 func (m Model) CurrentView() viewID { return m.view }
 
-// hasTextInput returns true for views where typing 'q' should input text, not quit.
-func hasTextInput(v viewID) bool {
-	return v == viewPassword || v == viewTaskForm || v == viewSecretForm
+// isTextInputActive returns true when a text input is focused and q should not quit.
+func (m Model) isTextInputActive() bool {
+	switch m.view {
+	case viewPassword:
+		return true
+	case viewSecretList:
+		return m.secretList.searching
+	case viewSecretForm:
+		return true
+	case viewTaskForm:
+		return true
+	}
+	return false
 }
 
 // pendingFilter returns a task filter for pending tasks.

@@ -1,7 +1,9 @@
 .PHONY: build test lint run clean
 
+VERSION ?= dev
+
 build:
-	go build -o bin/zvault ./cmd/zvault
+	go build -ldflags "-X main.version=$(VERSION)" -o bin/zvault ./cmd/zvault
 
 test:
 	go test -race ./...

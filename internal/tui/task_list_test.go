@@ -418,8 +418,8 @@ func TestTaskListFilterCycling(t *testing.T) {
 	m := newTaskListModel(v)
 
 	// initial: all
-	if m.filter != filterAll {
-		t.Fatalf("initial filter = %d, want filterAll", m.filter)
+	if m.filter != taskFilterAll {
+		t.Fatalf("initial filter = %d, want taskFilterAll", m.filter)
 	}
 	if len(m.tasks) != 2 {
 		t.Fatalf("all: len = %d, want 2", len(m.tasks))
@@ -427,8 +427,8 @@ func TestTaskListFilterCycling(t *testing.T) {
 
 	// tab -> pending
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
-	if m.filter != filterPendingOnly {
-		t.Fatalf("after tab: filter = %d, want filterPendingOnly", m.filter)
+	if m.filter != taskFilterPending {
+		t.Fatalf("after tab: filter = %d, want taskFilterPending", m.filter)
 	}
 	if len(m.tasks) != 1 {
 		t.Fatalf("pending: len = %d, want 1", len(m.tasks))
@@ -436,8 +436,8 @@ func TestTaskListFilterCycling(t *testing.T) {
 
 	// tab -> done
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
-	if m.filter != filterDoneOnly {
-		t.Fatalf("after 2 tabs: filter = %d, want filterDoneOnly", m.filter)
+	if m.filter != taskFilterDone {
+		t.Fatalf("after 2 tabs: filter = %d, want taskFilterDone", m.filter)
 	}
 	if len(m.tasks) != 1 {
 		t.Fatalf("done: len = %d, want 1", len(m.tasks))
@@ -445,8 +445,8 @@ func TestTaskListFilterCycling(t *testing.T) {
 
 	// tab -> wraps back to all
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
-	if m.filter != filterAll {
-		t.Fatalf("after 3 tabs: filter = %d, want filterAll", m.filter)
+	if m.filter != taskFilterAll {
+		t.Fatalf("after 3 tabs: filter = %d, want taskFilterAll", m.filter)
 	}
 }
 
@@ -458,9 +458,9 @@ func TestTaskListFilterLabel(t *testing.T) {
 		filter filterMode
 		want   string
 	}{
-		{filterAll, "Filter: All"},
-		{filterPendingOnly, "Filter: Pending"},
-		{filterDoneOnly, "Filter: Done"},
+		{taskFilterAll, "Filter: All"},
+		{taskFilterPending, "Filter: Pending"},
+		{taskFilterDone, "Filter: Done"},
 	}
 
 	for _, tt := range tests {
