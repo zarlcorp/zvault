@@ -216,11 +216,11 @@ func TestSecretFormViewShowsTypeSelector(t *testing.T) {
 	m := newSecretForm()
 	m = m.initForCreate()
 	view := m.View()
-	if !strings.Contains(view, "Password") {
-		t.Error("create form should show type selector with Password")
+	if !strings.Contains(view, "password") {
+		t.Error("create form should show type selector with password")
 	}
-	if !strings.Contains(view, "API Key") {
-		t.Error("create form should show type selector with API Key")
+	if !strings.Contains(view, "api key") {
+		t.Error("create form should show type selector with api key")
 	}
 }
 
@@ -228,14 +228,14 @@ func TestSecretFormViewShowsFields(t *testing.T) {
 	m := newSecretForm()
 	m = m.initForCreate()
 	view := m.View()
-	if !strings.Contains(view, "Name") {
-		t.Error("form should show Name field")
+	if !strings.Contains(view, "name") {
+		t.Error("form should show name field")
 	}
-	if !strings.Contains(view, "URL") {
-		t.Error("password form should show URL field")
+	if !strings.Contains(view, "url") {
+		t.Error("password form should show url field")
 	}
-	if !strings.Contains(view, "Username") {
-		t.Error("password form should show Username field")
+	if !strings.Contains(view, "username") {
+		t.Error("password form should show username field")
 	}
 }
 
@@ -319,10 +319,10 @@ func TestTypeLabel(t *testing.T) {
 		typ  secret.Type
 		want string
 	}{
-		{secret.TypePassword, "Password"},
-		{secret.TypeAPIKey, "API Key"},
-		{secret.TypeSSHKey, "SSH Key"},
-		{secret.TypeNote, "Note"},
+		{secret.TypePassword, "password"},
+		{secret.TypeAPIKey, "api key"},
+		{secret.TypeSSHKey, "ssh key"},
+		{secret.TypeNote, "note"},
 	}
 	for _, tt := range tests {
 		got := typeLabel(tt.typ)

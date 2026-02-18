@@ -34,7 +34,7 @@ func TestTaskDetailShowsTask(t *testing.T) {
 	if !strings.Contains(view, "Review PR") {
 		t.Error("should show title")
 	}
-	if !strings.Contains(view, "High") {
+	if !strings.Contains(view, "high") {
 		t.Error("should show priority")
 	}
 	if !strings.Contains(view, "in 2 days") {
@@ -43,7 +43,7 @@ func TestTaskDetailShowsTask(t *testing.T) {
 	if !strings.Contains(view, "#work") {
 		t.Error("should show tags")
 	}
-	if !strings.Contains(view, "Pending") {
+	if !strings.Contains(view, "pending") {
 		t.Error("should show status")
 	}
 }
@@ -56,11 +56,11 @@ func TestTaskDetailShowsDoneStatus(t *testing.T) {
 	m.loadTask(tk.ID)
 
 	view := m.View()
-	if !strings.Contains(view, "Done") {
-		t.Error("should show Done status")
+	if !strings.Contains(view, "done") {
+		t.Error("should show done status")
 	}
-	if !strings.Contains(view, "Completed") {
-		t.Error("should show Completed timestamp")
+	if !strings.Contains(view, "completed") {
+		t.Error("should show completed timestamp")
 	}
 }
 

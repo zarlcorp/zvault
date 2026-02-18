@@ -399,16 +399,16 @@ func (m taskListModel) View() string {
 func (m taskListModel) filterLabel() string {
 	switch m.filter {
 	case taskFilterPending:
-		return "Filter: Pending"
+		return "filter: pending"
 	case taskFilterDone:
-		return "Filter: Done"
+		return "filter: done"
 	case taskFilterByTag:
 		if len(m.tags) > 0 {
-			return "Filter: #" + m.tags[m.tagIndex]
+			return "filter: #" + m.tags[m.tagIndex]
 		}
-		return "Filter: All"
+		return "filter: all"
 	default:
-		return "Filter: All"
+		return "filter: all"
 	}
 }
 

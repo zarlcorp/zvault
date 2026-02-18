@@ -15,8 +15,8 @@ func TestTaskFormCreateMode(t *testing.T) {
 	m.reset()
 
 	view := m.View()
-	if !strings.Contains(view, "New Task") {
-		t.Error("create mode should show 'New Task'")
+	if !strings.Contains(view, "new task") {
+		t.Error("create mode should show 'new task'")
 	}
 	if m.editing != nil {
 		t.Error("create mode should have nil editing")
@@ -31,8 +31,8 @@ func TestTaskFormEditMode(t *testing.T) {
 	m.loadTask(tk)
 
 	view := m.View()
-	if !strings.Contains(view, "Edit Task") {
-		t.Error("edit mode should show 'Edit Task'")
+	if !strings.Contains(view, "edit task") {
+		t.Error("edit mode should show 'edit task'")
 	}
 	if m.editing == nil {
 		t.Error("edit mode should have non-nil editing")
@@ -401,10 +401,10 @@ func TestTaskFormViewShowsPrioritySelector(t *testing.T) {
 	m.reset()
 
 	view := m.View()
-	if !strings.Contains(view, "Priority") {
-		t.Error("should show Priority label")
+	if !strings.Contains(view, "priority") {
+		t.Error("should show priority label")
 	}
-	if !strings.Contains(view, "None") {
+	if !strings.Contains(view, "none") {
 		t.Error("should show initial priority value")
 	}
 }

@@ -302,10 +302,10 @@ func TestPasswordViewFirstRun(t *testing.T) {
 		t.Fatal("should detect first run for non-existent dir")
 	}
 	view := m.password.View()
-	if !strings.Contains(view, "Create New Vault") {
-		t.Error("first-run view should say 'Create New Vault'")
+	if !strings.Contains(view, "create new vault") {
+		t.Error("first-run view should say 'create new vault'")
 	}
-	if !strings.Contains(view, "Confirm") {
+	if !strings.Contains(view, "confirm") {
 		t.Error("first-run view should have confirm field")
 	}
 }
@@ -317,10 +317,10 @@ func TestPasswordViewReturningUser(t *testing.T) {
 		t.Fatal("should not be first run for existing dir")
 	}
 	view := m.password.View()
-	if !strings.Contains(view, "Unlock Vault") {
-		t.Error("returning user view should say 'Unlock Vault'")
+	if !strings.Contains(view, "unlock vault") {
+		t.Error("returning user view should say 'unlock vault'")
 	}
-	if strings.Contains(view, "Confirm") {
+	if strings.Contains(view, "confirm") {
 		t.Error("returning user view should not have confirm field")
 	}
 }
@@ -359,7 +359,7 @@ func TestHeaderRendering(t *testing.T) {
 	if !strings.Contains(h, "zvault") {
 		t.Error("header should contain app name")
 	}
-	if !strings.Contains(h, "Menu") {
+	if !strings.Contains(h, "menu") {
 		t.Error("header should contain view title")
 	}
 }
@@ -413,14 +413,14 @@ func TestViewTitles(t *testing.T) {
 		id   viewID
 		want string
 	}{
-		{viewPassword, "Unlock"},
-		{viewMenu, "Menu"},
-		{viewSecretList, "Secrets"},
-		{viewSecretDetail, "Secret"},
-		{viewSecretForm, "Edit Secret"},
-		{viewTaskList, "Tasks"},
-		{viewTaskDetail, "Task"},
-		{viewTaskForm, "Edit Task"},
+		{viewPassword, "unlock"},
+		{viewMenu, "menu"},
+		{viewSecretList, "secrets"},
+		{viewSecretDetail, "secret"},
+		{viewSecretForm, "edit secret"},
+		{viewTaskList, "tasks"},
+		{viewTaskDetail, "task"},
+		{viewTaskForm, "edit task"},
 	}
 	for _, tt := range tests {
 		got := viewTitle(tt.id)

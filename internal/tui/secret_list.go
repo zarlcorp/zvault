@@ -28,15 +28,15 @@ const (
 func (f typeFilter) label() string {
 	switch f {
 	case filterAll:
-		return "All"
+		return "all"
 	case filterPassword:
-		return "Password"
+		return "password"
 	case filterAPIKey:
-		return "API Key"
+		return "api key"
 	case filterSSHKey:
-		return "SSH Key"
+		return "ssh key"
 	case filterNote:
-		return "Note"
+		return "note"
 	}
 	return ""
 }

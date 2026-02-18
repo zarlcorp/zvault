@@ -57,13 +57,13 @@ var typeOptions = []secret.Type{
 func typeLabel(t secret.Type) string {
 	switch t {
 	case secret.TypePassword:
-		return "Password"
+		return "password"
 	case secret.TypeAPIKey:
-		return "API Key"
+		return "api key"
 	case secret.TypeSSHKey:
-		return "SSH Key"
+		return "ssh key"
 	case secret.TypeNote:
-		return "Note"
+		return "note"
 	}
 	return string(t)
 }
@@ -140,27 +140,27 @@ func buildFormInputs(t secret.Type, s secret.Secret) []formInput {
 	}
 
 	// name is always first
-	addInput("Name", "name", s.Name, false)
+	addInput("name", "name", s.Name, false)
 
 	switch t {
 	case secret.TypePassword:
-		addInput("URL", "url", s.URL(), false)
-		addInput("Username", "username", s.Username(), false)
-		addInput("Password", "password", s.Password(), true)
-		addInput("TOTP Secret", "totp_secret", s.TOTPSecret(), true)
-		addInput("Notes", "notes", s.Notes(), false)
+		addInput("url", "url", s.URL(), false)
+		addInput("username", "username", s.Username(), false)
+		addInput("password", "password", s.Password(), true)
+		addInput("totp secret", "totp_secret", s.TOTPSecret(), true)
+		addInput("notes", "notes", s.Notes(), false)
 	case secret.TypeAPIKey:
-		addInput("Service", "service", s.Service(), false)
-		addInput("Key", "key", s.Key(), true)
-		addInput("Notes", "notes", s.Notes(), false)
+		addInput("service", "service", s.Service(), false)
+		addInput("key", "key", s.Key(), true)
+		addInput("notes", "notes", s.Notes(), false)
 	case secret.TypeSSHKey:
-		addInput("Label", "label", s.Label(), false)
-		addInput("Private Key", "private_key", s.PrivateKey(), true)
-		addInput("Public Key", "public_key", s.PublicKey(), false)
-		addInput("Passphrase", "passphrase", s.Passphrase(), true)
-		addInput("Notes", "notes", s.Notes(), false)
+		addInput("label", "label", s.Label(), false)
+		addInput("private key", "private_key", s.PrivateKey(), true)
+		addInput("public key", "public_key", s.PublicKey(), false)
+		addInput("passphrase", "passphrase", s.Passphrase(), true)
+		addInput("notes", "notes", s.Notes(), false)
 	case secret.TypeNote:
-		addInput("Content", "content", s.Content(), false)
+		addInput("content", "content", s.Content(), false)
 	}
 
 	// tags always last
@@ -168,7 +168,7 @@ func buildFormInputs(t secret.Type, s secret.Secret) []formInput {
 	if len(s.Tags) > 0 {
 		tags = strings.Join(s.Tags, ", ")
 	}
-	addInput("Tags", "tags", tags, false)
+	addInput("tags", "tags", tags, false)
 
 	return inputs
 }
@@ -453,7 +453,7 @@ func (m secretFormModel) View() string {
 		if m.focused == -1 {
 			cursor = lipgloss.NewStyle().Foreground(zstyle.ZvaultAccent).Render("▸ ")
 		}
-		typeLbl := lipgloss.NewStyle().Foreground(zstyle.Subtext1).Render("Type")
+		typeLbl := lipgloss.NewStyle().Foreground(zstyle.Subtext1).Render("type")
 		b.WriteString(fmt.Sprintf("  %s%s  ", cursor, typeLbl))
 		for i, t := range typeOptions {
 			label := typeLabel(t)

@@ -154,30 +154,30 @@ func (m passwordModel) View() string {
 		title := lipgloss.NewStyle().
 			Foreground(zstyle.ZvaultAccent).
 			Bold(true).
-			Render("Create New Vault")
+			Render("create new vault")
 		b.WriteString(fmt.Sprintf("  %s\n\n", title))
-		desc := zstyle.MutedText.Render("Choose a master password to protect your vault.")
+		desc := zstyle.MutedText.Render("choose a master password to protect your vault.")
 		b.WriteString(fmt.Sprintf("  %s\n\n", desc))
 	} else {
 		title := lipgloss.NewStyle().
 			Foreground(zstyle.ZvaultAccent).
 			Bold(true).
-			Render("Unlock Vault")
+			Render("unlock vault")
 		b.WriteString(fmt.Sprintf("  %s\n\n", title))
-		desc := zstyle.MutedText.Render("Enter your master password.")
+		desc := zstyle.MutedText.Render("enter your master password.")
 		b.WriteString(fmt.Sprintf("  %s\n\n", desc))
 	}
 
 	// password field
 	label := zstyle.Subtext1
-	pwLabel := lipgloss.NewStyle().Foreground(label).Render("Password")
+	pwLabel := lipgloss.NewStyle().Foreground(label).Render("password")
 	b.WriteString(fmt.Sprintf("  %s\n", pwLabel))
 	b.WriteString(fmt.Sprintf("  %s\n", m.password.View()))
 
 	// confirm field (first-run only)
 	if m.firstRun {
 		b.WriteString("\n")
-		cfLabel := lipgloss.NewStyle().Foreground(label).Render("Confirm")
+		cfLabel := lipgloss.NewStyle().Foreground(label).Render("confirm")
 		b.WriteString(fmt.Sprintf("  %s\n", cfLabel))
 		b.WriteString(fmt.Sprintf("  %s\n", m.confirm.View()))
 	}

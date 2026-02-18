@@ -275,9 +275,9 @@ func (m taskFormModel) View() string {
 	b.WriteString("\n")
 
 	// mode label
-	mode := "New Task"
+	mode := "new task"
 	if m.editing != nil {
-		mode = "Edit Task"
+		mode = "edit task"
 	}
 	modeStyle := lipgloss.NewStyle().Foreground(zstyle.ZvaultAccent).Bold(true)
 	b.WriteString(fmt.Sprintf("  %s\n\n", modeStyle.Render(mode)))
@@ -287,7 +287,7 @@ func (m taskFormModel) View() string {
 	if m.focused == fieldTitle {
 		label = formActiveLabel
 	}
-	b.WriteString(fmt.Sprintf("  %s\n", label.Render("Title")))
+	b.WriteString(fmt.Sprintf("  %s\n", label.Render("title")))
 	b.WriteString(fmt.Sprintf("  %s\n\n", m.title.View()))
 
 	// priority field
@@ -295,7 +295,7 @@ func (m taskFormModel) View() string {
 	if m.focused == fieldPriority {
 		label = formActiveLabel
 	}
-	b.WriteString(fmt.Sprintf("  %s\n", label.Render("Priority")))
+	b.WriteString(fmt.Sprintf("  %s\n", label.Render("priority")))
 	b.WriteString(fmt.Sprintf("  %s\n\n", m.renderPrioritySelector()))
 
 	// due date field
@@ -303,7 +303,7 @@ func (m taskFormModel) View() string {
 	if m.focused == fieldDue {
 		label = formActiveLabel
 	}
-	b.WriteString(fmt.Sprintf("  %s\n", label.Render("Due Date")))
+	b.WriteString(fmt.Sprintf("  %s\n", label.Render("due date")))
 	b.WriteString(fmt.Sprintf("  %s\n\n", m.due.View()))
 
 	// tags field
@@ -311,7 +311,7 @@ func (m taskFormModel) View() string {
 	if m.focused == fieldTags {
 		label = formActiveLabel
 	}
-	b.WriteString(fmt.Sprintf("  %s\n", label.Render("Tags")))
+	b.WriteString(fmt.Sprintf("  %s\n", label.Render("tags")))
 	b.WriteString(fmt.Sprintf("  %s\n", m.tags.View()))
 
 	// error

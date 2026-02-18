@@ -141,18 +141,18 @@ func (m taskDetailModel) View() string {
 	b.WriteString(fmt.Sprintf("  %s\n\n", titleStyle.Render(m.task.Title)))
 
 	// status
-	status := "Pending"
+	status := "pending"
 	statusStyle := detailValueStyle.Foreground(zstyle.Yellow)
 	if m.task.Done {
-		status = "Done"
+		status = "done"
 		statusStyle = detailValueStyle.Foreground(zstyle.Green)
 	}
-	b.WriteString(fmt.Sprintf("  %s%s\n", detailLabelStyle.Render("Status"), statusStyle.Render(status)))
+	b.WriteString(fmt.Sprintf("  %s%s\n", detailLabelStyle.Render("status"), statusStyle.Render(status)))
 
 	// priority
 	pri := formatPriority(m.task.Priority)
 	priStyle := priorityStyle(m.task.Priority)
-	b.WriteString(fmt.Sprintf("  %s%s\n", detailLabelStyle.Render("Priority"), priStyle.Render(pri)))
+	b.WriteString(fmt.Sprintf("  %s%s\n", detailLabelStyle.Render("priority"), priStyle.Render(pri)))
 
 	// due date
 	if m.task.DueDate != nil {
@@ -163,7 +163,7 @@ func (m taskDetailModel) View() string {
 		if !m.task.Done && isOverdue(m.task.DueDate) {
 			dueStyle = detailValueStyle.Foreground(zstyle.Red)
 		}
-		b.WriteString(fmt.Sprintf("  %s%s\n", detailLabelStyle.Render("Due"), dueStyle.Render(display)))
+		b.WriteString(fmt.Sprintf("  %s%s\n", detailLabelStyle.Render("due"), dueStyle.Render(display)))
 	}
 
 	// tags
@@ -173,19 +173,19 @@ func (m taskDetailModel) View() string {
 			tagStrs = append(tagStrs, "#"+tag)
 		}
 		b.WriteString(fmt.Sprintf("  %s%s\n",
-			detailLabelStyle.Render("Tags"),
+			detailLabelStyle.Render("tags"),
 			taskTagStyle.Render(strings.Join(tagStrs, " "))))
 	}
 
 	// created
 	b.WriteString(fmt.Sprintf("  %s%s\n",
-		detailLabelStyle.Render("Created"),
+		detailLabelStyle.Render("created"),
 		zstyle.MutedText.Render(m.task.CreatedAt.Format("2006-01-02 15:04"))))
 
 	// completed
 	if m.task.CompletedAt != nil {
 		b.WriteString(fmt.Sprintf("  %s%s\n",
-			detailLabelStyle.Render("Completed"),
+			detailLabelStyle.Render("completed"),
 			zstyle.MutedText.Render(m.task.CompletedAt.Format("2006-01-02 15:04"))))
 	}
 
@@ -201,13 +201,13 @@ func (m taskDetailModel) View() string {
 func formatPriority(p task.Priority) string {
 	switch p {
 	case task.PriorityHigh:
-		return "High"
+		return "high"
 	case task.PriorityMedium:
-		return "Medium"
+		return "medium"
 	case task.PriorityLow:
-		return "Low"
+		return "low"
 	default:
-		return "None"
+		return "none"
 	}
 }
 

@@ -169,9 +169,9 @@ func TestSecretDetailClipboardMsg(t *testing.T) {
 	m := newSecretDetail()
 	m.secretID = "test"
 
-	m, _ = m.Update(clipboardCopiedMsg{field: "Password"})
-	if !strings.Contains(m.clipboardMsg, "Copied Password") {
-		t.Fatalf("clipboardMsg = %q, want 'Copied Password...'", m.clipboardMsg)
+	m, _ = m.Update(clipboardCopiedMsg{field: "password"})
+	if !strings.Contains(m.clipboardMsg, "Copied password") {
+		t.Fatalf("clipboardMsg = %q, want 'Copied password...'", m.clipboardMsg)
 	}
 
 	m, _ = m.Update(clipboardClearedMsg{})
@@ -191,7 +191,7 @@ func TestBuildDetailFieldsPassword(t *testing.T) {
 	for _, f := range fields {
 		labels[f.label] = true
 	}
-	for _, want := range []string{"Name", "Type", "URL", "Username", "Password", "TOTP Secret", "Notes", "Tags", "Created", "Updated"} {
+	for _, want := range []string{"name", "type", "url", "username", "password", "totp secret", "notes", "tags", "created", "updated"} {
 		if !labels[want] {
 			t.Errorf("missing field %q", want)
 		}
@@ -200,11 +200,11 @@ func TestBuildDetailFieldsPassword(t *testing.T) {
 	// check sensitive flags
 	for _, f := range fields {
 		switch f.label {
-		case "Password", "TOTP Secret":
+		case "password", "totp secret":
 			if !f.sensitive {
 				t.Errorf("field %q should be sensitive", f.label)
 			}
-		case "Name", "URL", "Username":
+		case "name", "url", "username":
 			if f.sensitive {
 				t.Errorf("field %q should not be sensitive", f.label)
 			}
@@ -218,7 +218,7 @@ func TestBuildDetailFieldsAPIKey(t *testing.T) {
 
 	var foundKey bool
 	for _, f := range fields {
-		if f.label == "Key" {
+		if f.label == "key" {
 			foundKey = true
 			if !f.sensitive {
 				t.Error("Key field should be sensitive")
@@ -226,7 +226,7 @@ func TestBuildDetailFieldsAPIKey(t *testing.T) {
 		}
 	}
 	if !foundKey {
-		t.Error("API key should have Key field")
+		t.Error("api key should have key field")
 	}
 }
 
@@ -241,11 +241,11 @@ func TestBuildDetailFieldsSSHKey(t *testing.T) {
 			sensitiveLabels[f.label] = true
 		}
 	}
-	if !sensitiveLabels["Private Key"] {
-		t.Error("Private Key should be sensitive")
+	if !sensitiveLabels["private key"] {
+		t.Error("private key should be sensitive")
 	}
-	if !sensitiveLabels["Passphrase"] {
-		t.Error("Passphrase should be sensitive")
+	if !sensitiveLabels["passphrase"] {
+		t.Error("passphrase should be sensitive")
 	}
 }
 
@@ -255,7 +255,7 @@ func TestBuildDetailFieldsNote(t *testing.T) {
 
 	var foundContent bool
 	for _, f := range fields {
-		if f.label == "Content" {
+		if f.label == "content" {
 			foundContent = true
 			if f.value != "some content" {
 				t.Errorf("Content value = %q, want 'some content'", f.value)
@@ -263,7 +263,7 @@ func TestBuildDetailFieldsNote(t *testing.T) {
 		}
 	}
 	if !foundContent {
-		t.Error("Note should have Content field")
+		t.Error("note should have content field")
 	}
 }
 
@@ -274,10 +274,10 @@ func TestBuildDetailFieldsMetadata(t *testing.T) {
 	fields := buildDetailFields(s)
 
 	for _, f := range fields {
-		if f.label == "Created" && !strings.Contains(f.value, "2026-01-15") {
+		if f.label == "created" && !strings.Contains(f.value, "2026-01-15") {
 			t.Errorf("Created = %q, want date containing '2026-01-15'", f.value)
 		}
-		if f.label == "Updated" && !strings.Contains(f.value, "2026-02-18") {
+		if f.label == "updated" && !strings.Contains(f.value, "2026-02-18") {
 			t.Errorf("Updated = %q, want date containing '2026-02-18'", f.value)
 		}
 	}
