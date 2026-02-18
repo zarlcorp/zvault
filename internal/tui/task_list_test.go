@@ -458,9 +458,9 @@ func TestTaskListFilterLabel(t *testing.T) {
 		filter filterMode
 		want   string
 	}{
-		{taskFilterAll, "Filter: All"},
-		{taskFilterPending, "Filter: Pending"},
-		{taskFilterDone, "Filter: Done"},
+		{taskFilterAll, "filter: all"},
+		{taskFilterPending, "filter: pending"},
+		{taskFilterDone, "filter: done"},
 	}
 
 	for _, tt := range tests {
@@ -615,15 +615,15 @@ func TestTaskListFilterLabelByTag(t *testing.T) {
 
 	// tags sorted: urgent, work
 	label := m.filterLabel()
-	if label != "Filter: #urgent" {
-		t.Fatalf("label = %q, want %q", label, "Filter: #urgent")
+	if label != "filter: #urgent" {
+		t.Fatalf("label = %q, want %q", label, "filter: #urgent")
 	}
 
 	// cycle to next tag
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
 	label = m.filterLabel()
-	if label != "Filter: #work" {
-		t.Fatalf("label = %q, want %q", label, "Filter: #work")
+	if label != "filter: #work" {
+		t.Fatalf("label = %q, want %q", label, "filter: #work")
 	}
 }
 

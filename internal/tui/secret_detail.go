@@ -62,46 +62,46 @@ func (m secretDetailModel) load() secretDetailModel {
 func buildDetailFields(s secret.Secret) []detailField {
 	var fields []detailField
 
-	fields = append(fields, detailField{label: "Name", value: s.Name})
-	fields = append(fields, detailField{label: "Type", value: string(s.Type)})
+	fields = append(fields, detailField{label: "name", value: s.Name})
+	fields = append(fields, detailField{label: "type", value: string(s.Type)})
 
 	switch s.Type {
 	case secret.TypePassword:
-		fields = append(fields, detailField{label: "URL", value: s.URL()})
-		fields = append(fields, detailField{label: "Username", value: s.Username()})
-		fields = append(fields, detailField{label: "Password", value: s.Password(), sensitive: true})
+		fields = append(fields, detailField{label: "url", value: s.URL()})
+		fields = append(fields, detailField{label: "username", value: s.Username()})
+		fields = append(fields, detailField{label: "password", value: s.Password(), sensitive: true})
 		if s.TOTPSecret() != "" {
-			fields = append(fields, detailField{label: "TOTP Secret", value: s.TOTPSecret(), sensitive: true})
+			fields = append(fields, detailField{label: "totp secret", value: s.TOTPSecret(), sensitive: true})
 		}
 		if s.Notes() != "" {
-			fields = append(fields, detailField{label: "Notes", value: s.Notes()})
+			fields = append(fields, detailField{label: "notes", value: s.Notes()})
 		}
 	case secret.TypeAPIKey:
-		fields = append(fields, detailField{label: "Service", value: s.Service()})
-		fields = append(fields, detailField{label: "Key", value: s.Key(), sensitive: true})
+		fields = append(fields, detailField{label: "service", value: s.Service()})
+		fields = append(fields, detailField{label: "key", value: s.Key(), sensitive: true})
 		if s.Notes() != "" {
-			fields = append(fields, detailField{label: "Notes", value: s.Notes()})
+			fields = append(fields, detailField{label: "notes", value: s.Notes()})
 		}
 	case secret.TypeSSHKey:
-		fields = append(fields, detailField{label: "Label", value: s.Label()})
-		fields = append(fields, detailField{label: "Private Key", value: s.PrivateKey(), sensitive: true})
-		fields = append(fields, detailField{label: "Public Key", value: s.PublicKey()})
+		fields = append(fields, detailField{label: "label", value: s.Label()})
+		fields = append(fields, detailField{label: "private key", value: s.PrivateKey(), sensitive: true})
+		fields = append(fields, detailField{label: "public key", value: s.PublicKey()})
 		if s.Passphrase() != "" {
-			fields = append(fields, detailField{label: "Passphrase", value: s.Passphrase(), sensitive: true})
+			fields = append(fields, detailField{label: "passphrase", value: s.Passphrase(), sensitive: true})
 		}
 		if s.Notes() != "" {
-			fields = append(fields, detailField{label: "Notes", value: s.Notes()})
+			fields = append(fields, detailField{label: "notes", value: s.Notes()})
 		}
 	case secret.TypeNote:
-		fields = append(fields, detailField{label: "Content", value: s.Content()})
+		fields = append(fields, detailField{label: "content", value: s.Content()})
 	}
 
 	if len(s.Tags) > 0 {
-		fields = append(fields, detailField{label: "Tags", value: strings.Join(s.Tags, ", ")})
+		fields = append(fields, detailField{label: "tags", value: strings.Join(s.Tags, ", ")})
 	}
 
-	fields = append(fields, detailField{label: "Created", value: s.CreatedAt.Format("2006-01-02 15:04")})
-	fields = append(fields, detailField{label: "Updated", value: s.UpdatedAt.Format("2006-01-02 15:04")})
+	fields = append(fields, detailField{label: "created", value: s.CreatedAt.Format("2006-01-02 15:04")})
+	fields = append(fields, detailField{label: "updated", value: s.UpdatedAt.Format("2006-01-02 15:04")})
 
 	return fields
 }

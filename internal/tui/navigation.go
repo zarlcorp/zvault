@@ -20,21 +20,21 @@ const (
 func viewTitle(id viewID) string {
 	switch id {
 	case viewPassword:
-		return "Unlock"
+		return "unlock"
 	case viewMenu:
-		return "Menu"
+		return "menu"
 	case viewSecretList:
-		return "Secrets"
+		return "secrets"
 	case viewSecretDetail:
-		return "Secret"
+		return "secret"
 	case viewSecretForm:
-		return "Edit Secret"
+		return "edit secret"
 	case viewTaskList:
-		return "Tasks"
+		return "tasks"
 	case viewTaskDetail:
-		return "Task"
+		return "task"
 	case viewTaskForm:
-		return "Edit Task"
+		return "edit task"
 	default:
 		return ""
 	}

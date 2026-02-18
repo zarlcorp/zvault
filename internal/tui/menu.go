@@ -92,8 +92,8 @@ func (m menuModel) View() string {
 		label string
 		count string
 	}{
-		{"Secrets", fmt.Sprintf("(%d)", m.secretCount)},
-		{"Tasks", fmt.Sprintf("(%d pending)", m.pendingCount)},
+		{"secrets", fmt.Sprintf("(%d)", m.secretCount)},
+		{"tasks", fmt.Sprintf("(%d pending)", m.pendingCount)},
 	}
 
 	selectedStyle := lipgloss.NewStyle().

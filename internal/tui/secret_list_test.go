@@ -19,7 +19,7 @@ func TestSecretListViewEmpty(t *testing.T) {
 func TestSecretListViewShowsFilterTabs(t *testing.T) {
 	m := newSecretList()
 	view := m.View()
-	for _, label := range []string{"All", "Password", "API Key", "SSH Key", "Note"} {
+	for _, label := range []string{"all", "password", "api key", "ssh key", "note"} {
 		if !strings.Contains(view, label) {
 			t.Errorf("list should show filter tab %q", label)
 		}
