@@ -12,6 +12,8 @@ Encrypted local storage for secrets, keys, notes.
 
 Manage your sensitive data with a simple terminal interface. zvault stores everything encrypted on your machine -- your data, your device, your keys. No sync, no cloud, no servers. Download the binary and run.
 
+![zvault demo](docs/demo.gif)
+
 ## Install
 
 ### Via Homebrew

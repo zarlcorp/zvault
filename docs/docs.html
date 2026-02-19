@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>zvault — Documentation</title>
+  <title>zvault — documentation</title>
   <meta name="description" content="CLI command reference for zvault.">
   <link rel="stylesheet" href="https://zarlcorp.github.io/shared.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <nav class="bar">
     <div class="container">
       <a href="https://zarlcorp.github.io" class="nav-brand">zarlcorp</a>
@@ -17,16 +18,16 @@
     </div>
   </nav>
 
-  <div class="container">
+  <div class="container docs-page">
 
-    <div class="window" style="margin-top: var(--gap);">
+    <div class="window">
       <div class="window-title">zvault docs</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>zvault provides an interactive TUI and a scriptable CLI. Run <code>zvault</code> with no arguments to launch the TUI, or use subcommands for automation.</p>
+          <p>zvault provides an interactive TUI and a scriptable CLI. run <code>zvault</code> with no arguments to launch the TUI, or use subcommands for automation.</p>
           <pre><code>zvault &lt;command&gt; [args]
 
-Commands:
+commands:
   secret      manage secrets
   task        manage tasks
   export      export vault data
@@ -41,10 +42,10 @@ Commands:
       <div class="window-title">zvault secret store</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Create a new secret. You will be prompted for the secret value interactively.</p>
+          <p>create a new secret. you will be prompted for the secret value interactively.</p>
           <pre><code>zvault secret store -t &lt;type&gt; -n &lt;name&gt; [--tags tag1,tag2]</code></pre>
-          <p>Supported types: <code>password</code>, <code>apikey</code>, <code>sshkey</code>, <code>note</code>.</p>
-          <p>For notes, you can pipe content via stdin:</p>
+          <p>supported types: <code>password</code>, <code>apikey</code>, <code>sshkey</code>, <code>note</code>.</p>
+          <p>for notes, you can pipe content via stdin:</p>
           <pre><code>echo "my note" | zvault secret store -t note -n mynote</code></pre>
         </div>
       </div>
@@ -54,9 +55,9 @@ Commands:
       <div class="window-title">zvault secret get</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Retrieve a secret by ID, name, or ID prefix. Sensitive values are masked by default.</p>
+          <p>retrieve a secret by ID, name, or ID prefix. sensitive values are masked by default.</p>
           <pre><code>zvault secret get &lt;id-or-name&gt; [--show]</code></pre>
-          <p>Use <code>--show</code> to reveal sensitive values like passwords and API keys.</p>
+          <p>use <code>--show</code> to reveal sensitive values like passwords and API keys.</p>
         </div>
       </div>
     </div>
@@ -65,7 +66,7 @@ Commands:
       <div class="window-title">zvault secret list</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>List all stored secrets. Optionally filter by type or tag.</p>
+          <p>list all stored secrets. optionally filter by type or tag.</p>
           <pre><code>zvault secret list [-t &lt;type&gt;] [--tag &lt;tag&gt;]</code></pre>
         </div>
       </div>
@@ -75,7 +76,7 @@ Commands:
       <div class="window-title">zvault secret delete</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Delete a secret. Prompts for confirmation before deleting.</p>
+          <p>delete a secret. prompts for confirmation before deleting.</p>
           <pre><code>zvault secret delete &lt;id-or-name&gt;</code></pre>
         </div>
       </div>
@@ -85,7 +86,7 @@ Commands:
       <div class="window-title">zvault secret search</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Search secrets by name.</p>
+          <p>search secrets by name.</p>
           <pre><code>zvault secret search &lt;query&gt;</code></pre>
         </div>
       </div>
@@ -95,9 +96,9 @@ Commands:
       <div class="window-title">zvault task add</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Add a new task with optional priority, due date, and tags.</p>
+          <p>add a new task with optional priority, due date, and tags.</p>
           <pre><code>zvault task add [-p &lt;h|m|l&gt;] [-d &lt;date&gt;] [--tags tag1,tag2] &lt;title&gt;</code></pre>
-          <p>Due date formats: <code>YYYY-MM-DD</code>, <code>today</code>, <code>tomorrow</code>, <code>next week</code>, <code>+3d</code>.</p>
+          <p>due date formats: <code>YYYY-MM-DD</code>, <code>today</code>, <code>tomorrow</code>, <code>next week</code>, <code>+3d</code>.</p>
         </div>
       </div>
     </div>
@@ -106,9 +107,9 @@ Commands:
       <div class="window-title">zvault task list</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>List tasks. Filter by status, priority, or tag.</p>
+          <p>list tasks. filter by status, priority, or tag.</p>
           <pre><code>zvault task list [--pending] [--done] [-p &lt;h|m|l&gt;] [--tag &lt;tag&gt;]</code></pre>
-          <p>Alias: <code>zvault task ls</code></p>
+          <p>alias: <code>zvault task ls</code></p>
         </div>
       </div>
     </div>
@@ -117,7 +118,7 @@ Commands:
       <div class="window-title">zvault task done</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Mark one or more tasks as complete.</p>
+          <p>mark one or more tasks as complete.</p>
           <pre><code>zvault task done &lt;id&gt;
 zvault task done &lt;id1&gt;,&lt;id2&gt;</code></pre>
         </div>
@@ -128,7 +129,7 @@ zvault task done &lt;id1&gt;,&lt;id2&gt;</code></pre>
       <div class="window-title">zvault task edit</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Rename a task.</p>
+          <p>rename a task.</p>
           <pre><code>zvault task edit &lt;id&gt; &lt;new title&gt;</code></pre>
         </div>
       </div>
@@ -138,7 +139,7 @@ zvault task done &lt;id1&gt;,&lt;id2&gt;</code></pre>
       <div class="window-title">zvault task rm</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Delete one or more tasks.</p>
+          <p>delete one or more tasks.</p>
           <pre><code>zvault task rm &lt;id&gt;
 zvault task rm &lt;id1&gt;,&lt;id2&gt;</code></pre>
         </div>
@@ -149,7 +150,7 @@ zvault task rm &lt;id1&gt;,&lt;id2&gt;</code></pre>
       <div class="window-title">zvault task clear</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Delete all completed tasks.</p>
+          <p>delete all completed tasks.</p>
           <pre><code>zvault task clear</code></pre>
         </div>
       </div>
@@ -159,9 +160,9 @@ zvault task rm &lt;id1&gt;,&lt;id2&gt;</code></pre>
       <div class="window-title">zvault export</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Export vault data as markdown. By default exports both secrets and tasks.</p>
+          <p>export vault data as markdown. by default exports both secrets and tasks.</p>
           <pre><code>zvault export [--tasks] [--secrets] [--pending] [--done]</code></pre>
-          <p>Use <code>--tasks</code> or <code>--secrets</code> to export only one category. Use <code>--pending</code> or <code>--done</code> to filter tasks by status.</p>
+          <p>use <code>--tasks</code> or <code>--secrets</code> to export only one category. use <code>--pending</code> or <code>--done</code> to filter tasks by status.</p>
         </div>
       </div>
     </div>
@@ -170,7 +171,7 @@ zvault task rm &lt;id1&gt;,&lt;id2&gt;</code></pre>
       <div class="window-title">zvault completion</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Generate shell completion scripts.</p>
+          <p>generate shell completion scripts.</p>
           <pre><code># bash (add to ~/.bashrc)
 eval "$(zvault completion bash)"
 
@@ -187,7 +188,7 @@ zvault completion fish | source</code></pre>
       <div class="window-title">zvault version</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>Print the zvault version.</p>
+          <p>print the zvault version.</p>
           <pre><code>zvault version</code></pre>
         </div>
       </div>
@@ -197,17 +198,18 @@ zvault completion fish | source</code></pre>
       <div class="window-title">configuration</div>
       <div class="window-content">
         <div class="doc-content">
-          <p>zvault stores its encrypted vault in <code>~/.local/share/zvault/</code>. The vault is initialized on first use via the TUI.</p>
-          <p>Set the <code>ZVAULT_PASSWORD</code> environment variable to skip interactive password prompts (useful for scripting).</p>
-          <p>Set <code>NO_COLOR</code> to disable colored output.</p>
+          <p>zvault stores its encrypted vault in <code>~/.local/share/zvault/</code>. the vault is initialized on first use via the TUI.</p>
+          <p>set the <code>ZVAULT_PASSWORD</code> environment variable to skip interactive password prompts (useful for scripting).</p>
+          <p>set <code>NO_COLOR</code> to disable colored output.</p>
         </div>
       </div>
     </div>
 
     <footer class="footer">
-      <p><a href="index.html">&larr; Back to zvault</a> &middot; <a href="https://zarlcorp.github.io">zarlcorp.github.io</a></p>
+      <p><a href="index.html">&larr; back to zvault</a> &middot; <a href="https://zarlcorp.github.io">zarlcorp.github.io</a></p>
     </footer>
 
   </div>
+
 </body>
 </html>
