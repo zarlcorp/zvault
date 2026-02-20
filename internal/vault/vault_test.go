@@ -24,7 +24,10 @@ func openTestVault(t *testing.T) *vault.Vault {
 
 func TestSecretAddAndGet(t *testing.T) {
 	v := openTestVault(t)
-	s := secret.NewPassword("github", "https://github.com", "user", "pass")
+	s, err := secret.NewPassword("github", "https://github.com", "user", "pass")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if err := v.Secrets().Add(s); err != nil {
 		t.Fatalf("add: %v", err)
@@ -55,13 +58,20 @@ func TestSecretGetNotFound(t *testing.T) {
 func TestSecretList(t *testing.T) {
 	v := openTestVault(t)
 
-	secrets := []secret.Secret{
-		secret.NewPassword("github", "url", "u", "p"),
-		secret.NewAPIKey("stripe", "stripe.com", "sk_123"),
-		secret.NewNote("wifi", "password123"),
+	s1, err := secret.NewPassword("github", "url", "u", "p")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s2, err := secret.NewAPIKey("stripe", "stripe.com", "sk_123")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s3, err := secret.NewNote("wifi", "password123")
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	for _, s := range secrets {
+	for _, s := range []secret.Secret{s1, s2, s3} {
 		if err := v.Secrets().Add(s); err != nil {
 			t.Fatalf("add: %v", err)
 		}
@@ -79,7 +89,10 @@ func TestSecretList(t *testing.T) {
 
 func TestSecretUpdate(t *testing.T) {
 	v := openTestVault(t)
-	s := secret.NewPassword("github", "url", "user", "old-pass")
+	s, err := secret.NewPassword("github", "url", "user", "old-pass")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if err := v.Secrets().Add(s); err != nil {
 		t.Fatalf("add: %v", err)
@@ -102,7 +115,10 @@ func TestSecretUpdate(t *testing.T) {
 
 func TestSecretDelete(t *testing.T) {
 	v := openTestVault(t)
-	s := secret.NewNote("temp", "will delete")
+	s, err := secret.NewNote("temp", "will delete")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if err := v.Secrets().Add(s); err != nil {
 		t.Fatalf("add: %v", err)
@@ -112,7 +128,7 @@ func TestSecretDelete(t *testing.T) {
 		t.Fatalf("delete: %v", err)
 	}
 
-	_, err := v.Secrets().Get(s.ID)
+	_, err = v.Secrets().Get(s.ID)
 	if err == nil {
 		t.Fatal("expected error after delete")
 	}
@@ -130,9 +146,27 @@ func TestSecretDeleteNotFound(t *testing.T) {
 func TestSecretSearchByName(t *testing.T) {
 	v := openTestVault(t)
 
-	v.Secrets().Add(secret.NewPassword("GitHub Login", "url", "u", "p"))
-	v.Secrets().Add(secret.NewPassword("GitLab Login", "url", "u", "p"))
-	v.Secrets().Add(secret.NewAPIKey("Stripe Key", "stripe", "key"))
+	s1, err := secret.NewPassword("GitHub Login", "url", "u", "p")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s2, err := secret.NewPassword("GitLab Login", "url", "u", "p")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s3, err := secret.NewAPIKey("Stripe Key", "stripe", "key")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := v.Secrets().Add(s1); err != nil {
+		t.Fatal(err)
+	}
+	if err := v.Secrets().Add(s2); err != nil {
+		t.Fatal(err)
+	}
+	if err := v.Secrets().Add(s3); err != nil {
+		t.Fatal(err)
+	}
 
 	tests := []struct {
 		query string
@@ -161,17 +195,32 @@ func TestSecretSearchByName(t *testing.T) {
 func TestSecretSearchByTag(t *testing.T) {
 	v := openTestVault(t)
 
-	s1 := secret.NewPassword("github", "url", "u", "p")
+	s1, err := secret.NewPassword("github", "url", "u", "p")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s1.Tags = []string{"Work", "dev"}
-	v.Secrets().Add(s1)
+	if err := v.Secrets().Add(s1); err != nil {
+		t.Fatal(err)
+	}
 
-	s2 := secret.NewAPIKey("stripe", "stripe", "key")
+	s2, err := secret.NewAPIKey("stripe", "stripe", "key")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s2.Tags = []string{"Work", "billing"}
-	v.Secrets().Add(s2)
+	if err := v.Secrets().Add(s2); err != nil {
+		t.Fatal(err)
+	}
 
-	s3 := secret.NewNote("personal wifi", "pass")
+	s3, err := secret.NewNote("personal wifi", "pass")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s3.Tags = []string{"home"}
-	v.Secrets().Add(s3)
+	if err := v.Secrets().Add(s3); err != nil {
+		t.Fatal(err)
+	}
 
 	tests := []struct {
 		query string
@@ -200,10 +249,27 @@ func TestSecretSearchByType(t *testing.T) {
 	v := openTestVault(t)
 
 	// use names that won't match the type string
-	v.Secrets().Add(secret.NewPassword("login-1", "url", "u", "p"))
-	v.Secrets().Add(secret.NewPassword("login-2", "url", "u", "p"))
-	v.Secrets().Add(secret.NewAPIKey("key-1", "svc", "k"))
-	v.Secrets().Add(secret.NewNote("memo-1", "content"))
+	s1, err := secret.NewPassword("login-1", "url", "u", "p")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s2, err := secret.NewPassword("login-2", "url", "u", "p")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s3, err := secret.NewAPIKey("key-1", "svc", "k")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s4, err := secret.NewNote("memo-1", "content")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, s := range []secret.Secret{s1, s2, s3, s4} {
+		if err := v.Secrets().Add(s); err != nil {
+			t.Fatal(err)
+		}
+	}
 
 	tests := []struct {
 		query string
@@ -232,7 +298,10 @@ func TestSecretSearchByType(t *testing.T) {
 
 func TestTaskAddAndGet(t *testing.T) {
 	v := openTestVault(t)
-	tk := task.New("buy milk")
+	tk, err := task.New("buy milk")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if err := v.Tasks().Add(tk); err != nil {
 		t.Fatalf("add: %v", err)
@@ -259,7 +328,10 @@ func TestTaskGetNotFound(t *testing.T) {
 
 func TestTaskUpdate(t *testing.T) {
 	v := openTestVault(t)
-	tk := task.New("draft report")
+	tk, err := task.New("draft report")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if err := v.Tasks().Add(tk); err != nil {
 		t.Fatalf("add: %v", err)
@@ -284,7 +356,10 @@ func TestTaskUpdate(t *testing.T) {
 
 func TestTaskDelete(t *testing.T) {
 	v := openTestVault(t)
-	tk := task.New("temp task")
+	tk, err := task.New("temp task")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if err := v.Tasks().Add(tk); err != nil {
 		t.Fatalf("add: %v", err)
@@ -294,7 +369,7 @@ func TestTaskDelete(t *testing.T) {
 		t.Fatalf("delete: %v", err)
 	}
 
-	_, err := v.Tasks().Get(tk.ID)
+	_, err = v.Tasks().Get(tk.ID)
 	if err == nil {
 		t.Fatal("expected error after delete")
 	}
@@ -304,9 +379,18 @@ func TestTaskListFilterByStatus(t *testing.T) {
 	v := openTestVault(t)
 
 	// add 3 tasks: 2 pending, 1 done
-	t1 := task.New("pending-1")
-	t2 := task.New("pending-2")
-	t3 := task.New("done-1")
+	t1, err := task.New("pending-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t2, err := task.New("pending-2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t3, err := task.New("done-1")
+	if err != nil {
+		t.Fatal(err)
+	}
 	now := time.Now()
 	t3.Done = true
 	t3.CompletedAt = &now
@@ -344,16 +428,28 @@ func TestTaskListFilterByStatus(t *testing.T) {
 func TestTaskListFilterByPriority(t *testing.T) {
 	v := openTestVault(t)
 
-	t1 := task.New("high-1")
+	t1, err := task.New("high-1")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t1.Priority = task.PriorityHigh
 
-	t2 := task.New("high-2")
+	t2, err := task.New("high-2")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t2.Priority = task.PriorityHigh
 
-	t3 := task.New("low-1")
+	t3, err := task.New("low-1")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t3.Priority = task.PriorityLow
 
-	t4 := task.New("none-1")
+	t4, err := task.New("none-1")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	for _, tk := range []task.Task{t1, t2, t3, t4} {
 		if err := v.Tasks().Add(tk); err != nil {
@@ -388,13 +484,22 @@ func TestTaskListFilterByPriority(t *testing.T) {
 func TestTaskListFilterByTag(t *testing.T) {
 	v := openTestVault(t)
 
-	t1 := task.New("task-1")
+	t1, err := task.New("task-1")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t1.Tags = []string{"work", "urgent"}
 
-	t2 := task.New("task-2")
+	t2, err := task.New("task-2")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t2.Tags = []string{"work"}
 
-	t3 := task.New("task-3")
+	t3, err := task.New("task-3")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t3.Tags = []string{"personal"}
 
 	for _, tk := range []task.Task{t1, t2, t3} {
@@ -430,15 +535,24 @@ func TestTaskListFilterByTag(t *testing.T) {
 func TestTaskListCombinedFilters(t *testing.T) {
 	v := openTestVault(t)
 
-	t1 := task.New("high-work")
+	t1, err := task.New("high-work")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t1.Priority = task.PriorityHigh
 	t1.Tags = []string{"work"}
 
-	t2 := task.New("high-personal")
+	t2, err := task.New("high-personal")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t2.Priority = task.PriorityHigh
 	t2.Tags = []string{"personal"}
 
-	t3 := task.New("low-work")
+	t3, err := task.New("low-work")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t3.Priority = task.PriorityLow
 	t3.Tags = []string{"work"}
 
@@ -469,14 +583,26 @@ func TestTaskClearDone(t *testing.T) {
 
 	now := time.Now()
 
-	t1 := task.New("pending")
-	t2 := task.New("done-1")
+	t1, err := task.New("pending")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t2, err := task.New("done-1")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t2.Done = true
 	t2.CompletedAt = &now
-	t3 := task.New("done-2")
+	t3, err := task.New("done-2")
+	if err != nil {
+		t.Fatal(err)
+	}
 	t3.Done = true
 	t3.CompletedAt = &now
-	t4 := task.New("also pending")
+	t4, err := task.New("also pending")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	for _, tk := range []task.Task{t1, t2, t3, t4} {
 		if err := v.Tasks().Add(tk); err != nil {
@@ -522,8 +648,20 @@ func TestTaskClearDoneEmpty(t *testing.T) {
 func TestTaskClearDoneNoDoneTasks(t *testing.T) {
 	v := openTestVault(t)
 
-	v.Tasks().Add(task.New("pending-1"))
-	v.Tasks().Add(task.New("pending-2"))
+	p1, err := task.New("pending-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p2, err := task.New("pending-2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := v.Tasks().Add(p1); err != nil {
+		t.Fatal(err)
+	}
+	if err := v.Tasks().Add(p2); err != nil {
+		t.Fatal(err)
+	}
 
 	count, err := v.Tasks().ClearDone()
 	if err != nil {
@@ -578,12 +716,18 @@ func TestVaultPersistence(t *testing.T) {
 		t.Fatalf("first open: %v", err)
 	}
 
-	sec := secret.NewNote("persist-test", "hello")
+	sec, err := secret.NewNote("persist-test", "hello")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := v1.Secrets().Add(sec); err != nil {
 		t.Fatalf("add: %v", err)
 	}
 
-	tk := task.New("persist-task")
+	tk, err := task.New("persist-task")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := v1.Tasks().Add(tk); err != nil {
 		t.Fatalf("add task: %v", err)
 	}

@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/term"
 
+	"github.com/zarlcorp/zvault/internal/dates"
 	"github.com/zarlcorp/zvault/internal/vault"
 )
 
@@ -127,34 +128,16 @@ func readStdin() (string, bool) {
 }
 
 // parseDate parses ISO date (2026-03-01) or relative date strings.
+// delegates to the shared dates package, unwrapping the pointer.
 func parseDate(s string) (time.Time, error) {
-	now := time.Now()
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-
-	switch strings.ToLower(s) {
-	case "today":
-		return today, nil
-	case "tomorrow":
-		return today.AddDate(0, 0, 1), nil
-	case "next week":
-		return today.AddDate(0, 0, 7), nil
-	}
-
-	// +Nd relative format
-	if strings.HasPrefix(s, "+") && strings.HasSuffix(s, "d") {
-		ds := s[1 : len(s)-1]
-		var days int
-		if _, err := fmt.Sscanf(ds, "%d", &days); err == nil {
-			return today.AddDate(0, 0, days), nil
-		}
-	}
-
-	// ISO format
-	t, err := time.Parse("2006-01-02", s)
+	t, err := dates.Parse(s)
 	if err != nil {
+		return time.Time{}, err
+	}
+	if t == nil {
 		return time.Time{}, fmt.Errorf("invalid date %q (use YYYY-MM-DD, tomorrow, next week, +Nd)", s)
 	}
-	return t, nil
+	return *t, nil
 }
 
 // parseTags splits a comma-separated tag string.

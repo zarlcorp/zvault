@@ -3,8 +3,8 @@ package tui
 import (
 	"time"
 
-	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/zarlcorp/core/pkg/zclipboard"
 )
 
 const clipboardClearDelay = 10 * time.Second
@@ -21,7 +21,7 @@ type clipboardClearedMsg struct{}
 func copyToClipboard(field, val string) tea.Cmd {
 	return tea.Batch(
 		func() tea.Msg {
-			if err := clipboard.WriteAll(val); err != nil {
+			if err := zclipboard.Copy(val); err != nil {
 				return errMsg{err: err}
 			}
 			return clipboardCopiedMsg{field: field}
@@ -33,8 +33,7 @@ func copyToClipboard(field, val string) tea.Cmd {
 // scheduleClipboardClear returns a tick command that fires after the clear delay.
 func scheduleClipboardClear() tea.Cmd {
 	return tea.Tick(clipboardClearDelay, func(time.Time) tea.Msg {
-		// clear clipboard contents
-		_ = clipboard.WriteAll("")
+		_ = zclipboard.Clear()
 		return clipboardClearedMsg{}
 	})
 }

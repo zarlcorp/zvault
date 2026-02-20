@@ -47,20 +47,24 @@ type Filter struct {
 }
 
 // New creates a task with the given title.
-func New(title string) Task {
+func New(title string) (Task, error) {
+	id, err := generateID()
+	if err != nil {
+		return Task{}, fmt.Errorf("new task: %w", err)
+	}
 	now := time.Now()
 	return Task{
-		ID:        generateID(),
+		ID:        id,
 		Title:     title,
 		CreatedAt: now,
-	}
+	}, nil
 }
 
 // generateID returns an 8-character hex string from 4 random bytes.
-func generateID() string {
+func generateID() (string, error) {
 	b := make([]byte, 4)
 	if _, err := rand.Read(b); err != nil {
-		panic(fmt.Sprintf("crypto/rand: %v", err))
+		return "", fmt.Errorf("generate id: %w", err)
 	}
-	return hex.EncodeToString(b)
+	return hex.EncodeToString(b), nil
 }

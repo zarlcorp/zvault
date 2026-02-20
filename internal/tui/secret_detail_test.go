@@ -6,6 +6,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/zarlcorp/core/pkg/zstyle"
 	"github.com/zarlcorp/zvault/internal/secret"
 )
 
@@ -35,9 +36,13 @@ func TestSecretDetailEscNavigatesBack(t *testing.T) {
 }
 
 func TestSecretDetailToggleSensitive(t *testing.T) {
+	s, err := secret.NewPassword("test", "http://example.com", "user", "pass123")
+	if err != nil {
+		t.Fatal(err)
+	}
 	m := newSecretDetail()
 	m.secretID = "test"
-	m.secret = secret.NewPassword("test", "http://example.com", "user", "pass123")
+	m.secret = s
 	m.fields = buildDetailFields(m.secret)
 
 	if m.showSensitive {
@@ -57,9 +62,13 @@ func TestSecretDetailToggleSensitive(t *testing.T) {
 }
 
 func TestSecretDetailSensitiveMasked(t *testing.T) {
+	s, err := secret.NewPassword("test", "http://example.com", "user", "secretpass")
+	if err != nil {
+		t.Fatal(err)
+	}
 	m := newSecretDetail()
 	m.secretID = "test"
-	m.secret = secret.NewPassword("test", "http://example.com", "user", "secretpass")
+	m.secret = s
 	m.fields = buildDetailFields(m.secret)
 	m.showSensitive = false
 
@@ -73,9 +82,13 @@ func TestSecretDetailSensitiveMasked(t *testing.T) {
 }
 
 func TestSecretDetailSensitiveRevealed(t *testing.T) {
+	s, err := secret.NewPassword("test", "http://example.com", "user", "secretpass")
+	if err != nil {
+		t.Fatal(err)
+	}
 	m := newSecretDetail()
 	m.secretID = "test"
-	m.secret = secret.NewPassword("test", "http://example.com", "user", "secretpass")
+	m.secret = s
 	m.fields = buildDetailFields(m.secret)
 	m.showSensitive = true
 
@@ -86,9 +99,13 @@ func TestSecretDetailSensitiveRevealed(t *testing.T) {
 }
 
 func TestSecretDetailCursorNavigation(t *testing.T) {
+	s, err := secret.NewPassword("test", "http://example.com", "user", "pass")
+	if err != nil {
+		t.Fatal(err)
+	}
 	m := newSecretDetail()
 	m.secretID = "test"
-	m.secret = secret.NewPassword("test", "http://example.com", "user", "pass")
+	m.secret = s
 	m.fields = buildDetailFields(m.secret)
 	m.cursor = 0
 
@@ -112,9 +129,13 @@ func TestSecretDetailCursorNavigation(t *testing.T) {
 }
 
 func TestSecretDetailDeleteConfirmation(t *testing.T) {
+	s, err := secret.NewPassword("MyPass", "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	m := newSecretDetail()
 	m.secretID = "test"
-	m.secret = secret.NewPassword("MyPass", "", "", "")
+	m.secret = s
 	m.fields = buildDetailFields(m.secret)
 
 	// d triggers confirm
@@ -131,9 +152,13 @@ func TestSecretDetailDeleteConfirmation(t *testing.T) {
 }
 
 func TestSecretDetailDeleteConfirmView(t *testing.T) {
+	s, err := secret.NewPassword("MyPass", "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	m := newSecretDetail()
 	m.secretID = "test"
-	m.secret = secret.NewPassword("MyPass", "", "", "")
+	m.secret = s
 	m.fields = buildDetailFields(m.secret)
 	m.confirmDelete = true
 
@@ -144,9 +169,13 @@ func TestSecretDetailDeleteConfirmView(t *testing.T) {
 }
 
 func TestSecretDetailEditNavigatesToForm(t *testing.T) {
+	s, err := secret.NewPassword("test", "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	m := newSecretDetail()
 	m.secretID = "abc123"
-	m.fields = buildDetailFields(secret.NewPassword("test", "", "", ""))
+	m.fields = buildDetailFields(s)
 
 	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}})
 	if cmd == nil {
@@ -181,7 +210,10 @@ func TestSecretDetailClipboardMsg(t *testing.T) {
 }
 
 func TestBuildDetailFieldsPassword(t *testing.T) {
-	s := secret.NewPassword("Test", "http://example.com", "user", "pass123")
+	s, err := secret.NewPassword("Test", "http://example.com", "user", "pass123")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s.Fields["totp_secret"] = "JBSWY3DPEHPK3PXP"
 	s.Fields["notes"] = "my notes"
 	s.Tags = []string{"web", "dev"}
@@ -191,7 +223,7 @@ func TestBuildDetailFieldsPassword(t *testing.T) {
 	for _, f := range fields {
 		labels[f.label] = true
 	}
-	for _, want := range []string{"name", "type", "url", "username", "password", "totp secret", "notes", "tags", "created", "updated"} {
+	for _, want := range []string{"name", "type", "url", "username", "password", "totp secret", "totp code", "notes", "tags", "created", "updated"} {
 		if !labels[want] {
 			t.Errorf("missing field %q", want)
 		}
@@ -208,12 +240,69 @@ func TestBuildDetailFieldsPassword(t *testing.T) {
 			if f.sensitive {
 				t.Errorf("field %q should not be sensitive", f.label)
 			}
+		case "totp code":
+			if f.sensitive {
+				t.Error("totp code should not be sensitive")
+			}
+			if !f.live {
+				t.Error("totp code should be a live field")
+			}
+		}
+	}
+}
+
+func TestBuildDetailFieldsLabelColors(t *testing.T) {
+	s, err := secret.NewPassword("Test", "http://example.com", "user", "pass123")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Fields["totp_secret"] = "JBSWY3DPEHPK3PXP"
+	fields := buildDetailFields(s)
+
+	for _, f := range fields {
+		if f.labelColor == "" {
+			t.Errorf("field %q has no label color", f.label)
+		}
+	}
+
+	// verify name has accent color
+	for _, f := range fields {
+		if f.label == "name" && f.labelColor != zstyle.ZvaultAccent {
+			t.Errorf("name labelColor = %v, want ZvaultAccent", f.labelColor)
+		}
+	}
+
+	// verify sensitive fields have Peach color
+	for _, f := range fields {
+		if f.sensitive && f.labelColor != zstyle.Peach {
+			t.Errorf("sensitive field %q labelColor = %v, want Peach", f.label, f.labelColor)
+		}
+	}
+}
+
+func TestBuildDetailFieldsNoTOTPCodeWithoutSecret(t *testing.T) {
+	s, err := secret.NewPassword("Test", "http://example.com", "user", "pass123")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// no totp_secret set
+	fields := buildDetailFields(s)
+
+	for _, f := range fields {
+		if f.label == "totp code" {
+			t.Error("totp code field should not exist without totp secret")
+		}
+		if f.label == "totp secret" {
+			t.Error("totp secret field should not exist when empty")
 		}
 	}
 }
 
 func TestBuildDetailFieldsAPIKey(t *testing.T) {
-	s := secret.NewAPIKey("AWS", "aws", "AKIA1234")
+	s, err := secret.NewAPIKey("AWS", "aws", "AKIA1234")
+	if err != nil {
+		t.Fatal(err)
+	}
 	fields := buildDetailFields(s)
 
 	var foundKey bool
@@ -231,7 +320,10 @@ func TestBuildDetailFieldsAPIKey(t *testing.T) {
 }
 
 func TestBuildDetailFieldsSSHKey(t *testing.T) {
-	s := secret.NewSSHKey("Server", "prod", "-----BEGIN-----", "ssh-rsa AAAA")
+	s, err := secret.NewSSHKey("Server", "prod", "-----BEGIN-----", "ssh-rsa AAAA")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s.Fields["passphrase"] = "secret"
 	fields := buildDetailFields(s)
 
@@ -250,7 +342,10 @@ func TestBuildDetailFieldsSSHKey(t *testing.T) {
 }
 
 func TestBuildDetailFieldsNote(t *testing.T) {
-	s := secret.NewNote("Ideas", "some content")
+	s, err := secret.NewNote("Ideas", "some content")
+	if err != nil {
+		t.Fatal(err)
+	}
 	fields := buildDetailFields(s)
 
 	var foundContent bool
@@ -268,7 +363,10 @@ func TestBuildDetailFieldsNote(t *testing.T) {
 }
 
 func TestBuildDetailFieldsMetadata(t *testing.T) {
-	s := secret.NewPassword("test", "", "", "")
+	s, err := secret.NewPassword("test", "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s.CreatedAt = time.Date(2026, 1, 15, 10, 30, 0, 0, time.UTC)
 	s.UpdatedAt = time.Date(2026, 2, 18, 14, 0, 0, 0, time.UTC)
 	fields := buildDetailFields(s)

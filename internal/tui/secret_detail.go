@@ -3,14 +3,19 @@ package tui
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/zarlcorp/core/pkg/zstyle"
 	"github.com/zarlcorp/zvault/internal/secret"
+	"github.com/zarlcorp/zvault/internal/totp"
 	"github.com/zarlcorp/zvault/internal/vault"
 )
+
+// totpTickMsg triggers TOTP code refresh.
+type totpTickMsg time.Time
 
 // secretDetailModel displays a single secret's fields.
 type secretDetailModel struct {
@@ -29,14 +34,21 @@ type secretDetailModel struct {
 	cursor int
 	fields []detailField
 
+	// TOTP live code
+	totpCode      string
+	totpRemaining int
+	hasTOTP       bool
+
 	width  int
 	height int
 }
 
 type detailField struct {
-	label     string
-	value     string
-	sensitive bool
+	label      string
+	value      string
+	sensitive  bool
+	labelColor lipgloss.Color // per-field label color
+	live       bool           // live-updating field (e.g. TOTP code)
 }
 
 func newSecretDetail() secretDetailModel {
@@ -53,55 +65,84 @@ func (m secretDetailModel) load() secretDetailModel {
 	}
 	m.secret = s
 	m.fields = buildDetailFields(s)
+	m.hasTOTP = s.TOTPSecret() != ""
+	if m.hasTOTP {
+		m.refreshTOTP()
+	}
 	if m.cursor >= len(m.fields) {
 		m.cursor = 0
 	}
 	return m
 }
 
+func (m *secretDetailModel) refreshTOTP() {
+	code, remaining, err := totp.Generate(m.secret.TOTPSecret())
+	if err != nil {
+		m.totpCode = ""
+		m.totpRemaining = 0
+		return
+	}
+	m.totpCode = code
+	m.totpRemaining = remaining
+}
+
+func totpTickCmd() tea.Cmd {
+	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
+		return totpTickMsg(t)
+	})
+}
+
 func buildDetailFields(s secret.Secret) []detailField {
 	var fields []detailField
 
-	fields = append(fields, detailField{label: "name", value: s.Name})
-	fields = append(fields, detailField{label: "type", value: string(s.Type)})
+	// name rendered as header
+	fields = append(fields, detailField{label: "name", value: s.Name, labelColor: zstyle.ZvaultAccent})
+	// type uses the standard label color — the value gets special rendering in View()
+	fields = append(fields, detailField{label: "type", value: string(s.Type), labelColor: zstyle.Lavender})
+
+	sensitiveColor := zstyle.Peach
+	normalColor := zstyle.Lavender
 
 	switch s.Type {
 	case secret.TypePassword:
-		fields = append(fields, detailField{label: "url", value: s.URL()})
-		fields = append(fields, detailField{label: "username", value: s.Username()})
-		fields = append(fields, detailField{label: "password", value: s.Password(), sensitive: true})
+		fields = append(fields, detailField{label: "url", value: s.URL(), labelColor: normalColor})
+		fields = append(fields, detailField{label: "username", value: s.Username(), labelColor: normalColor})
+		fields = append(fields, detailField{label: "password", value: s.Password(), sensitive: true, labelColor: sensitiveColor})
 		if s.TOTPSecret() != "" {
-			fields = append(fields, detailField{label: "totp secret", value: s.TOTPSecret(), sensitive: true})
+			fields = append(fields, detailField{label: "totp secret", value: s.TOTPSecret(), sensitive: true, labelColor: sensitiveColor})
+			fields = append(fields, detailField{label: "totp code", live: true, labelColor: zstyle.Green})
 		}
 		if s.Notes() != "" {
-			fields = append(fields, detailField{label: "notes", value: s.Notes()})
+			fields = append(fields, detailField{label: "notes", value: s.Notes(), labelColor: normalColor})
 		}
 	case secret.TypeAPIKey:
-		fields = append(fields, detailField{label: "service", value: s.Service()})
-		fields = append(fields, detailField{label: "key", value: s.Key(), sensitive: true})
+		fields = append(fields, detailField{label: "service", value: s.Service(), labelColor: normalColor})
+		fields = append(fields, detailField{label: "key", value: s.Key(), sensitive: true, labelColor: sensitiveColor})
 		if s.Notes() != "" {
-			fields = append(fields, detailField{label: "notes", value: s.Notes()})
+			fields = append(fields, detailField{label: "notes", value: s.Notes(), labelColor: normalColor})
 		}
 	case secret.TypeSSHKey:
-		fields = append(fields, detailField{label: "label", value: s.Label()})
-		fields = append(fields, detailField{label: "private key", value: s.PrivateKey(), sensitive: true})
-		fields = append(fields, detailField{label: "public key", value: s.PublicKey()})
+		fields = append(fields, detailField{label: "label", value: s.Label(), labelColor: normalColor})
+		fields = append(fields, detailField{label: "private key", value: s.PrivateKey(), sensitive: true, labelColor: sensitiveColor})
+		fields = append(fields, detailField{label: "public key", value: s.PublicKey(), labelColor: normalColor})
 		if s.Passphrase() != "" {
-			fields = append(fields, detailField{label: "passphrase", value: s.Passphrase(), sensitive: true})
+			fields = append(fields, detailField{label: "passphrase", value: s.Passphrase(), sensitive: true, labelColor: sensitiveColor})
 		}
 		if s.Notes() != "" {
-			fields = append(fields, detailField{label: "notes", value: s.Notes()})
+			fields = append(fields, detailField{label: "notes", value: s.Notes(), labelColor: normalColor})
 		}
 	case secret.TypeNote:
-		fields = append(fields, detailField{label: "content", value: s.Content()})
+		fields = append(fields, detailField{label: "content", value: s.Content(), labelColor: normalColor})
 	}
+
+	metaColor := zstyle.Subtext1
 
 	if len(s.Tags) > 0 {
-		fields = append(fields, detailField{label: "tags", value: strings.Join(s.Tags, ", ")})
+		fields = append(fields, detailField{label: "tags", value: strings.Join(s.Tags, ", "), labelColor: normalColor})
 	}
 
-	fields = append(fields, detailField{label: "created", value: s.CreatedAt.Format("2006-01-02 15:04")})
-	fields = append(fields, detailField{label: "updated", value: s.UpdatedAt.Format("2006-01-02 15:04")})
+	fields = append(fields, detailField{label: "created", value: s.CreatedAt.Format("2006-01-02 15:04"), labelColor: metaColor})
+	fields = append(fields, detailField{label: "updated", value: s.UpdatedAt.Format("2006-01-02 15:04"), labelColor: metaColor})
 
 	return fields
 }
@@ -117,9 +158,19 @@ func (m secretDetailModel) Update(msg tea.Msg) (secretDetailModel, tea.Cmd) {
 				m.clipboardMsg = ""
 				m.cursor = 0
 				m = m.load()
+				if m.hasTOTP {
+					return m, totpTickCmd()
+				}
 			}
 		}
 		return m, nil
+
+	case totpTickMsg:
+		if !m.hasTOTP {
+			return m, nil
+		}
+		m.refreshTOTP()
+		return m, totpTickCmd()
 
 	case clipboardCopiedMsg:
 		m.clipboardMsg = fmt.Sprintf("copied %s (clears in 10s)", msg.field)
@@ -172,7 +223,11 @@ func (m secretDetailModel) handleKeys(msg tea.KeyMsg) (secretDetailModel, tea.Cm
 	case msg.String() == "c":
 		if m.cursor < len(m.fields) {
 			f := m.fields[m.cursor]
-			return m, copyToClipboard(f.label, f.value)
+			val := f.value
+			if f.live && m.totpCode != "" {
+				val = m.totpCode
+			}
+			return m, copyToClipboard(f.label, val)
 		}
 	case msg.String() == "e":
 		return m, func() tea.Msg {
@@ -194,10 +249,11 @@ func (m secretDetailModel) View() string {
 		return b.String()
 	}
 
-	labelStyle := lipgloss.NewStyle().Foreground(zstyle.Subtext1).Width(14)
 	valueStyle := lipgloss.NewStyle().Foreground(zstyle.Text)
 	maskedStyle := lipgloss.NewStyle().Foreground(zstyle.Surface2)
 	cursorStyle := lipgloss.NewStyle().Foreground(zstyle.ZvaultAccent)
+	codeStyle := lipgloss.NewStyle().Foreground(zstyle.Green)
+	countdownStyle := lipgloss.NewStyle().Foreground(zstyle.Overlay1)
 
 	b.WriteString("\n")
 	for i, f := range m.fields {
@@ -206,11 +262,28 @@ func (m secretDetailModel) View() string {
 			prefix = cursorStyle.Render("▸ ")
 		}
 
+		// name field: bold + accent
+		labelStyle := lipgloss.NewStyle().Foreground(f.labelColor).Width(14)
+		if f.label == "name" {
+			labelStyle = labelStyle.Bold(true)
+		}
 		label := labelStyle.Render(f.label)
+
 		var val string
-		if f.sensitive && !m.showSensitive {
+		switch {
+		case f.live:
+			// TOTP code: show generated code + countdown
+			if m.totpCode != "" {
+				val = codeStyle.Render(m.totpCode) + " " + countdownStyle.Render(fmt.Sprintf("(%ds)", m.totpRemaining))
+			} else {
+				val = maskedStyle.Render("generating...")
+			}
+		case f.label == "type":
+			// render type as badge
+			val = typeBadge(secret.Type(f.value))
+		case f.sensitive && !m.showSensitive:
 			val = maskedStyle.Render("••••••••")
-		} else {
+		default:
 			val = valueStyle.Render(f.value)
 		}
 

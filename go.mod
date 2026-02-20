@@ -3,18 +3,21 @@ module github.com/zarlcorp/zvault
 go 1.26.0
 
 require (
-	github.com/atotto/clipboard v0.1.4
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/zarlcorp/core/pkg/zapp v0.2.0
+	github.com/zarlcorp/core/pkg/zclipboard v0.1.0
 	github.com/zarlcorp/core/pkg/zfilesystem v0.3.0
 	github.com/zarlcorp/core/pkg/zstore v0.1.0
 	github.com/zarlcorp/core/pkg/zstyle v0.5.11
 	golang.org/x/term v0.40.0
 )
 
+replace github.com/zarlcorp/core/pkg/zclipboard => ../core/pkg/zclipboard
+
 require (
+	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/colorprofile v0.4.1 // indirect
 	github.com/charmbracelet/x/ansi v0.11.6 // indirect

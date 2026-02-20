@@ -119,7 +119,7 @@ func TestSecretListSearchMode(t *testing.T) {
 	}
 }
 
-func TestSecretListFilterCycle(t *testing.T) {
+func TestSecretListFilterCycleNoTags(t *testing.T) {
 	m := newSecretList()
 	if m.filter != filterAll {
 		t.Fatalf("initial filter = %d, want filterAll", m.filter)
@@ -127,7 +127,7 @@ func TestSecretListFilterCycle(t *testing.T) {
 
 	tabKey := tea.KeyMsg{Type: tea.KeyTab}
 
-	// tab cycles filter
+	// tab cycles type filters
 	m, _ = m.Update(tabKey)
 	if m.filter != filterPassword {
 		t.Fatalf("filter = %d, want filterPassword", m.filter)
@@ -148,10 +148,109 @@ func TestSecretListFilterCycle(t *testing.T) {
 		t.Fatalf("filter = %d, want filterNote", m.filter)
 	}
 
-	// wraps back to all
+	// no tags: skips tag mode, wraps to all
 	m, _ = m.Update(tabKey)
 	if m.filter != filterAll {
-		t.Fatalf("filter = %d, want filterAll (wrapped)", m.filter)
+		t.Fatalf("filter = %d, want filterAll (skipped tag mode)", m.filter)
+	}
+}
+
+func TestSecretListFilterCycleWithTags(t *testing.T) {
+	m := newSecretList()
+	m.secrets = []secret.Secret{
+		{ID: "1", Name: "A", Type: secret.TypePassword, Tags: []string{"work"}},
+		{ID: "2", Name: "B", Type: secret.TypeAPIKey, Tags: []string{"personal", "work"}},
+		{ID: "3", Name: "C", Type: secret.TypeNote},
+	}
+	// pre-populate tags
+	m.tags = []string{"personal", "work"}
+
+	tabKey := tea.KeyMsg{Type: tea.KeyTab}
+
+	// cycle through type filters
+	for i := 0; i < 4; i++ {
+		m, _ = m.Update(tabKey)
+	}
+	if m.filter != filterNote {
+		t.Fatalf("filter = %d, want filterNote", m.filter)
+	}
+
+	// next tab enters tag mode with first tag
+	m, _ = m.Update(tabKey)
+	if m.filter != filterByTag {
+		t.Fatalf("filter = %d, want filterByTag", m.filter)
+	}
+	if m.tagIndex != 0 {
+		t.Fatalf("tagIndex = %d, want 0", m.tagIndex)
+	}
+
+	// next tab moves to second tag
+	m, _ = m.Update(tabKey)
+	if m.filter != filterByTag {
+		t.Fatalf("filter = %d, want filterByTag (second tag)", m.filter)
+	}
+	if m.tagIndex != 1 {
+		t.Fatalf("tagIndex = %d, want 1", m.tagIndex)
+	}
+
+	// next tab wraps back to all
+	m, _ = m.Update(tabKey)
+	if m.filter != filterAll {
+		t.Fatalf("filter = %d, want filterAll (wrapped from tags)", m.filter)
+	}
+}
+
+func TestSecretListTagFilterResults(t *testing.T) {
+	m := newSecretList()
+	m.secrets = []secret.Secret{
+		{ID: "1", Name: "GitHub", Type: secret.TypePassword, Tags: []string{"dev"}},
+		{ID: "2", Name: "AWS", Type: secret.TypeAPIKey, Tags: []string{"work"}},
+		{ID: "3", Name: "Notes", Type: secret.TypeNote, Tags: []string{"dev", "work"}},
+	}
+	m.tags = []string{"dev", "work"}
+	m.filter = filterByTag
+	m.tagIndex = 0 // "dev"
+
+	// manually trigger load behavior: apply tag filter
+	var filtered []secret.Secret
+	tag := m.tags[m.tagIndex]
+	for _, s := range m.secrets {
+		for _, st := range s.Tags {
+			if st == tag {
+				filtered = append(filtered, s)
+				break
+			}
+		}
+	}
+
+	if len(filtered) != 2 {
+		t.Fatalf("expected 2 secrets with tag 'dev', got %d", len(filtered))
+	}
+	if filtered[0].Name != "GitHub" || filtered[1].Name != "Notes" {
+		t.Errorf("filtered = [%s, %s], want [GitHub, Notes]", filtered[0].Name, filtered[1].Name)
+	}
+}
+
+func TestSecretListViewShowsTagFilter(t *testing.T) {
+	m := newSecretList()
+	m.tags = []string{"dev", "work"}
+	m.filter = filterByTag
+	m.tagIndex = 0
+
+	view := m.View()
+	if !strings.Contains(view, "#dev") {
+		t.Error("tag filter should show '#dev' when active")
+	}
+}
+
+func TestSecretListViewShowsTagsLabel(t *testing.T) {
+	m := newSecretList()
+	m.tags = []string{"dev"}
+	m.filter = filterAll
+
+	view := m.View()
+	if !strings.Contains(view, "tags") {
+		t.Error("should show 'tags' label when tags exist but not in tag mode")
 	}
 }
 

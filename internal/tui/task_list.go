@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/zarlcorp/core/pkg/zstyle"
+	"github.com/zarlcorp/zvault/internal/dates"
 	"github.com/zarlcorp/zvault/internal/task"
 	"github.com/zarlcorp/zvault/internal/vault"
 )
@@ -26,16 +27,17 @@ const (
 
 // taskListModel is the task list view.
 type taskListModel struct {
-	vault    *vault.Vault
-	tasks    []task.Task
-	cursor   int
-	filter   filterMode
-	tags     []string    // unique tags across all tasks for tag filtering
-	tagIndex int         // which tag is selected when cycling tags
-	width    int
-	height   int
-	confirm  confirmKind // active confirmation prompt
-	doneCount int        // cached count of done tasks for clear prompt
+	vault     *vault.Vault
+	tasks     []task.Task
+	cursor    int
+	filter    filterMode
+	tags      []string    // unique tags across all tasks for tag filtering
+	tagIndex  int         // which tag is selected when cycling tags
+	width     int
+	height    int
+	confirm   confirmKind // active confirmation prompt
+	doneCount int         // cached count of done tasks for clear prompt
+	err       string      // last load error
 }
 
 // confirmKind tracks which confirmation prompt is active.
@@ -63,9 +65,11 @@ func (m *taskListModel) loadTasks() {
 	tasks, err := m.vault.Tasks().List(f)
 	if err != nil {
 		m.tasks = nil
+		m.err = fmt.Sprintf("load tasks: %v", err)
 		return
 	}
 
+	m.err = ""
 	sortTasks(tasks)
 	m.tasks = tasks
 
@@ -291,7 +295,7 @@ func (m taskListModel) toggleDone() (taskListModel, tea.Cmd) {
 	t := m.tasks[m.cursor]
 	t.Done = !t.Done
 	if t.Done {
-		now := nowFunc()
+		now := dates.NowFunc()
 		t.CompletedAt = &now
 	} else {
 		t.CompletedAt = nil
@@ -350,6 +354,11 @@ func (m taskListModel) View() string {
 	// filter indicator
 	filterLabel := m.filterLabel()
 	b.WriteString(fmt.Sprintf("  %s\n\n", zstyle.MutedText.Render(filterLabel)))
+
+	if m.err != "" {
+		b.WriteString(fmt.Sprintf("  %s\n", zstyle.StatusErr.Render(m.err)))
+		return b.String()
+	}
 
 	if len(m.tasks) == 0 {
 		b.WriteString(fmt.Sprintf("  %s\n", zstyle.MutedText.Render("no tasks")))
@@ -446,10 +455,10 @@ func (m taskListModel) renderTaskLine(t task.Task, selected bool) string {
 
 	// due date
 	if t.DueDate != nil {
-		dueStr := formatDueDate(t.DueDate)
+		dueStr := dates.FormatDue(t.DueDate)
 		if t.Done {
 			dueStr = taskDueDimStyle.Render("due: " + dueStr)
-		} else if isOverdue(t.DueDate) {
+		} else if dates.IsOverdue(t.DueDate) {
 			dueStr = taskDueRedStyle.Render("due: " + dueStr)
 		} else {
 			dueStr = taskDueDimStyle.Render("due: " + dueStr)

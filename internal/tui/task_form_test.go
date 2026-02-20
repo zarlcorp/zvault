@@ -6,6 +6,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/zarlcorp/zvault/internal/dates"
 	"github.com/zarlcorp/zvault/internal/task"
 )
 
@@ -177,9 +178,9 @@ func TestTaskFormPriorityCycleWithSpace(t *testing.T) {
 }
 
 func TestTaskFormSaveNewTask(t *testing.T) {
-	orig := nowFunc
-	defer func() { nowFunc = orig }()
-	nowFunc = fixedTime(2026, time.February, 18)
+	orig := dates.NowFunc
+	defer func() { dates.NowFunc = orig }()
+	dates.NowFunc = fixedTime(2026, time.February, 18)
 
 	v := openTestVault(t)
 	m := newTaskFormModel(v)

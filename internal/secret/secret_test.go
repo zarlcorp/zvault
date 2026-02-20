@@ -8,7 +8,10 @@ import (
 )
 
 func TestNewPassword(t *testing.T) {
-	s := secret.NewPassword("github", "https://github.com", "user", "pass123")
+	s, err := secret.NewPassword("github", "https://github.com", "user", "pass123")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if s.Name != "github" {
 		t.Fatalf("name = %q, want %q", s.Name, "github")
@@ -30,7 +33,10 @@ func TestNewPassword(t *testing.T) {
 }
 
 func TestNewAPIKey(t *testing.T) {
-	s := secret.NewAPIKey("stripe", "stripe.com", "sk_test_123")
+	s, err := secret.NewAPIKey("stripe", "stripe.com", "sk_test_123")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if s.Name != "stripe" {
 		t.Fatalf("name = %q, want %q", s.Name, "stripe")
@@ -49,7 +55,10 @@ func TestNewAPIKey(t *testing.T) {
 }
 
 func TestNewSSHKey(t *testing.T) {
-	s := secret.NewSSHKey("server", "prod-server", "-----BEGIN...", "ssh-ed25519 AAAA...")
+	s, err := secret.NewSSHKey("server", "prod-server", "-----BEGIN...", "ssh-ed25519 AAAA...")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if s.Name != "server" {
 		t.Fatalf("name = %q, want %q", s.Name, "server")
@@ -71,7 +80,10 @@ func TestNewSSHKey(t *testing.T) {
 }
 
 func TestNewNote(t *testing.T) {
-	s := secret.NewNote("wifi", "my secret wifi password")
+	s, err := secret.NewNote("wifi", "my secret wifi password")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if s.Name != "wifi" {
 		t.Fatalf("name = %q, want %q", s.Name, "wifi")
@@ -87,69 +99,102 @@ func TestNewNote(t *testing.T) {
 }
 
 func TestFieldGetters(t *testing.T) {
+	mustPassword := func(t *testing.T, name, url, user, pass string) secret.Secret {
+		t.Helper()
+		s, err := secret.NewPassword(name, url, user, pass)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return s
+	}
+	mustAPIKey := func(t *testing.T, name, svc, key string) secret.Secret {
+		t.Helper()
+		s, err := secret.NewAPIKey(name, svc, key)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return s
+	}
+	mustSSHKey := func(t *testing.T, name, label, priv, pub string) secret.Secret {
+		t.Helper()
+		s, err := secret.NewSSHKey(name, label, priv, pub)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return s
+	}
+	mustNote := func(t *testing.T, name, content string) secret.Secret {
+		t.Helper()
+		s, err := secret.NewNote(name, content)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return s
+	}
+
 	tests := []struct {
 		name   string
-		secret secret.Secret
+		secret func(t *testing.T) secret.Secret
 		getter func(secret.Secret) string
 		want   string
 	}{
 		{
 			name:   "password/url",
-			secret: secret.NewPassword("test", "https://example.com", "u", "p"),
+			secret: func(t *testing.T) secret.Secret { return mustPassword(t, "test", "https://example.com", "u", "p") },
 			getter: secret.Secret.URL,
 			want:   "https://example.com",
 		},
 		{
 			name:   "password/username",
-			secret: secret.NewPassword("test", "url", "admin", "p"),
+			secret: func(t *testing.T) secret.Secret { return mustPassword(t, "test", "url", "admin", "p") },
 			getter: secret.Secret.Username,
 			want:   "admin",
 		},
 		{
 			name:   "password/password",
-			secret: secret.NewPassword("test", "url", "u", "s3cret"),
+			secret: func(t *testing.T) secret.Secret { return mustPassword(t, "test", "url", "u", "s3cret") },
 			getter: secret.Secret.Password,
 			want:   "s3cret",
 		},
 		{
 			name:   "apikey/service",
-			secret: secret.NewAPIKey("test", "aws", "key"),
+			secret: func(t *testing.T) secret.Secret { return mustAPIKey(t, "test", "aws", "key") },
 			getter: secret.Secret.Service,
 			want:   "aws",
 		},
 		{
 			name:   "apikey/key",
-			secret: secret.NewAPIKey("test", "svc", "AKIAIOSFODNN7EXAMPLE"),
+			secret: func(t *testing.T) secret.Secret { return mustAPIKey(t, "test", "svc", "AKIAIOSFODNN7EXAMPLE") },
 			getter: secret.Secret.Key,
 			want:   "AKIAIOSFODNN7EXAMPLE",
 		},
 		{
 			name:   "sshkey/label",
-			secret: secret.NewSSHKey("test", "my-key", "priv", "pub"),
+			secret: func(t *testing.T) secret.Secret { return mustSSHKey(t, "test", "my-key", "priv", "pub") },
 			getter: secret.Secret.Label,
 			want:   "my-key",
 		},
 		{
 			name:   "sshkey/private_key",
-			secret: secret.NewSSHKey("test", "lbl", "PRIVATE", "pub"),
+			secret: func(t *testing.T) secret.Secret { return mustSSHKey(t, "test", "lbl", "PRIVATE", "pub") },
 			getter: secret.Secret.PrivateKey,
 			want:   "PRIVATE",
 		},
 		{
 			name:   "sshkey/public_key",
-			secret: secret.NewSSHKey("test", "lbl", "priv", "PUBLIC"),
+			secret: func(t *testing.T) secret.Secret { return mustSSHKey(t, "test", "lbl", "priv", "PUBLIC") },
 			getter: secret.Secret.PublicKey,
 			want:   "PUBLIC",
 		},
 		{
 			name:   "note/content",
-			secret: secret.NewNote("test", "hello world"),
+			secret: func(t *testing.T) secret.Secret { return mustNote(t, "test", "hello world") },
 			getter: secret.Secret.Content,
 			want:   "hello world",
 		},
 		{
 			name:   "missing field returns empty",
-			secret: secret.NewNote("test", "content"),
+			secret: func(t *testing.T) secret.Secret { return mustNote(t, "test", "content") },
 			getter: secret.Secret.URL,
 			want:   "",
 		},
@@ -157,7 +202,7 @@ func TestFieldGetters(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.getter(tt.secret)
+			got := tt.getter(tt.secret(t))
 			if got != tt.want {
 				t.Fatalf("got %q, want %q", got, tt.want)
 			}
@@ -166,7 +211,10 @@ func TestFieldGetters(t *testing.T) {
 }
 
 func TestOptionalFields(t *testing.T) {
-	s := secret.NewPassword("test", "url", "user", "pass")
+	s, err := secret.NewPassword("test", "url", "user", "pass")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s.Fields["totp_secret"] = "JBSWY3DPEHPK3PXP"
 	s.Fields["notes"] = "some notes"
 
@@ -179,7 +227,10 @@ func TestOptionalFields(t *testing.T) {
 }
 
 func TestSSHKeyPassphrase(t *testing.T) {
-	s := secret.NewSSHKey("test", "lbl", "priv", "pub")
+	s, err := secret.NewSSHKey("test", "lbl", "priv", "pub")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s.Fields["passphrase"] = "my-passphrase"
 
 	if s.Passphrase() != "my-passphrase" {
@@ -190,7 +241,10 @@ func TestSSHKeyPassphrase(t *testing.T) {
 func TestIDUniqueness(t *testing.T) {
 	seen := make(map[string]bool)
 	for range 100 {
-		s := secret.NewNote("test", "content")
+		s, err := secret.NewNote("test", "content")
+		if err != nil {
+			t.Fatal(err)
+		}
 		if seen[s.ID] {
 			t.Fatalf("duplicate ID: %s", s.ID)
 		}
@@ -200,13 +254,19 @@ func TestIDUniqueness(t *testing.T) {
 
 func TestIDFormat(t *testing.T) {
 	for range 50 {
-		s := secret.NewNote("test", "content")
+		s, err := secret.NewNote("test", "content")
+		if err != nil {
+			t.Fatal(err)
+		}
 		assertValidID(t, s.ID)
 	}
 }
 
 func TestTags(t *testing.T) {
-	s := secret.NewPassword("test", "url", "user", "pass")
+	s, err := secret.NewPassword("test", "url", "user", "pass")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s.Tags = []string{"work", "github"}
 
 	if len(s.Tags) != 2 {

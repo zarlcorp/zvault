@@ -6,6 +6,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/zarlcorp/zvault/internal/dates"
 	"github.com/zarlcorp/zvault/internal/task"
 )
 
@@ -19,9 +20,9 @@ func TestTaskDetailNotLoaded(t *testing.T) {
 }
 
 func TestTaskDetailShowsTask(t *testing.T) {
-	orig := nowFunc
-	defer func() { nowFunc = orig }()
-	nowFunc = fixedTime(2026, time.February, 18)
+	orig := dates.NowFunc
+	defer func() { dates.NowFunc = orig }()
+	dates.NowFunc = fixedTime(2026, time.February, 18)
 
 	v := openTestVault(t)
 	due := time.Date(2026, 2, 20, 0, 0, 0, 0, time.Local)
@@ -191,9 +192,9 @@ func TestTaskDetailDeleteCancel(t *testing.T) {
 }
 
 func TestTaskDetailOverdueDateRed(t *testing.T) {
-	orig := nowFunc
-	defer func() { nowFunc = orig }()
-	nowFunc = fixedTime(2026, time.February, 18)
+	orig := dates.NowFunc
+	defer func() { dates.NowFunc = orig }()
+	dates.NowFunc = fixedTime(2026, time.February, 18)
 
 	v := openTestVault(t)
 	past := time.Date(2026, 2, 15, 0, 0, 0, 0, time.Local)

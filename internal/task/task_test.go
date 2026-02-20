@@ -9,7 +9,10 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	tk := task.New("buy milk")
+	tk, err := task.New("buy milk")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if tk.Title != "buy milk" {
 		t.Fatalf("title = %q, want %q", tk.Title, "buy milk")
@@ -33,7 +36,10 @@ func TestNew(t *testing.T) {
 }
 
 func TestTaskFields(t *testing.T) {
-	tk := task.New("deploy")
+	tk, err := task.New("deploy")
+	if err != nil {
+		t.Fatal(err)
+	}
 	tk.Priority = task.PriorityHigh
 	tk.Tags = []string{"ops", "urgent"}
 
@@ -52,7 +58,10 @@ func TestTaskFields(t *testing.T) {
 }
 
 func TestTaskCompletion(t *testing.T) {
-	tk := task.New("finish spec")
+	tk, err := task.New("finish spec")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if tk.Done {
 		t.Fatal("should not be done initially")
 	}
@@ -111,7 +120,10 @@ func TestFilterStatusConstants(t *testing.T) {
 func TestIDUniqueness(t *testing.T) {
 	seen := make(map[string]bool)
 	for range 100 {
-		tk := task.New("test")
+		tk, err := task.New("test")
+		if err != nil {
+			t.Fatal(err)
+		}
 		if seen[tk.ID] {
 			t.Fatalf("duplicate ID: %s", tk.ID)
 		}
@@ -121,7 +133,10 @@ func TestIDUniqueness(t *testing.T) {
 
 func TestIDFormat(t *testing.T) {
 	for range 50 {
-		tk := task.New("test")
+		tk, err := task.New("test")
+		if err != nil {
+			t.Fatal(err)
+		}
 		assertValidID(t, tk.ID)
 	}
 }

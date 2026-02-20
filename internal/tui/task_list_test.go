@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/zarlcorp/core/pkg/zfilesystem"
+	"github.com/zarlcorp/zvault/internal/dates"
 	"github.com/zarlcorp/zvault/internal/task"
 	"github.com/zarlcorp/zvault/internal/vault"
 )
@@ -23,7 +24,10 @@ func openTestVault(t *testing.T) *vault.Vault {
 
 func addTask(t *testing.T, v *vault.Vault, title string, opts ...func(*task.Task)) task.Task {
 	t.Helper()
-	tk := task.New(title)
+	tk, err := task.New(title)
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, opt := range opts {
 		opt(&tk)
 	}
@@ -110,9 +114,9 @@ func TestTaskListCheckbox(t *testing.T) {
 }
 
 func TestTaskListDueDate(t *testing.T) {
-	orig := nowFunc
-	defer func() { nowFunc = orig }()
-	nowFunc = fixedTime(2026, time.February, 18)
+	orig := dates.NowFunc
+	defer func() { dates.NowFunc = orig }()
+	dates.NowFunc = fixedTime(2026, time.February, 18)
 
 	v := openTestVault(t)
 	tomorrow := time.Date(2026, 2, 19, 0, 0, 0, 0, time.Local)

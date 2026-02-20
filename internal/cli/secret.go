@@ -75,24 +75,25 @@ func runSecretStore(args []string) {
 
 	var sec secret.Secret
 
+	var err error
 	switch secret.Type(typ) {
 	case secret.TypePassword:
 		url := promptLine("url: ")
 		username := promptLine("username: ")
 		password := promptPassword("password: ")
-		sec = secret.NewPassword(name, url, username, password)
+		sec, err = secret.NewPassword(name, url, username, password)
 
 	case secret.TypeAPIKey:
 		service := promptLine("service: ")
 		key := promptPassword("api key: ")
-		sec = secret.NewAPIKey(name, service, key)
+		sec, err = secret.NewAPIKey(name, service, key)
 
 	case secret.TypeNote:
 		content, piped := readStdin()
 		if !piped {
 			content = promptLine("content: ")
 		}
-		sec = secret.NewNote(name, content)
+		sec, err = secret.NewNote(name, content)
 
 	case secret.TypeSSHKey:
 		label := promptLine("label: ")
@@ -102,17 +103,22 @@ func runSecretStore(args []string) {
 		pubKey := promptLine("")
 
 		// try reading as file paths
-		if data, err := os.ReadFile(privKey); err == nil {
+		if data, e := os.ReadFile(privKey); e == nil {
 			privKey = strings.TrimSpace(string(data))
 		}
-		if data, err := os.ReadFile(pubKey); err == nil {
+		if data, e := os.ReadFile(pubKey); e == nil {
 			pubKey = strings.TrimSpace(string(data))
 		}
 
-		sec = secret.NewSSHKey(name, label, privKey, pubKey)
+		sec, err = secret.NewSSHKey(name, label, privKey, pubKey)
 
 	default:
 		errf("unknown secret type %q (use password, apikey, sshkey, note)", typ)
+		os.Exit(1)
+	}
+
+	if err != nil {
+		errf("create secret: %v", err)
 		os.Exit(1)
 	}
 

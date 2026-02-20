@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -22,6 +23,7 @@ const (
 	filterAPIKey
 	filterSSHKey
 	filterNote
+	filterByTag
 	filterCount // sentinel
 )
 
@@ -62,6 +64,10 @@ type secretListModel struct {
 	cursor  int
 	filter  typeFilter
 
+	// tag filtering
+	tags     []string // unique tags across all secrets
+	tagIndex int      // selected tag when cycling
+
 	// search
 	searching bool
 	search    textinput.Model
@@ -69,8 +75,9 @@ type secretListModel struct {
 	// delete confirmation
 	confirmDelete bool
 
-	// status message
+	// status/error messages
 	status string
+	err    string
 
 	width  int
 	height int
@@ -101,11 +108,17 @@ func (m secretListModel) loadSecrets() secretListModel {
 	}
 	if err != nil {
 		m.secrets = nil
+		m.err = fmt.Sprintf("load secrets: %v", err)
 		return m
 	}
 
+	m.err = ""
+
+	// collect tags from unfiltered set
+	m.collectTags(all)
+
 	// apply type filter
-	if m.filter != filterAll {
+	if m.filter != filterAll && m.filter != filterByTag {
 		ft := m.filter.secretType()
 		var filtered []secret.Secret
 		for _, s := range all {
@@ -116,11 +129,63 @@ func (m secretListModel) loadSecrets() secretListModel {
 		all = filtered
 	}
 
+	// apply tag filter
+	if m.filter == filterByTag && len(m.tags) > 0 {
+		tag := m.tags[m.tagIndex]
+		var filtered []secret.Secret
+		for _, s := range all {
+			for _, st := range s.Tags {
+				if st == tag {
+					filtered = append(filtered, s)
+					break
+				}
+			}
+		}
+		all = filtered
+	}
+
 	m.secrets = all
 	if m.cursor >= len(m.secrets) {
 		m.cursor = max(0, len(m.secrets)-1)
 	}
 	return m
+}
+
+func (m *secretListModel) collectTags(secrets []secret.Secret) {
+	m.tags = nil
+	seen := make(map[string]bool)
+	for _, s := range secrets {
+		for _, tag := range s.Tags {
+			if !seen[tag] {
+				seen[tag] = true
+				m.tags = append(m.tags, tag)
+			}
+		}
+	}
+	sort.Strings(m.tags)
+}
+
+// advanceFilter moves to the next filter mode. In tag mode, tab cycles
+// through tags; after the last tag it wraps to all. If no tags exist,
+// tag mode is skipped.
+func (m *secretListModel) advanceFilter() {
+	if m.filter == filterByTag {
+		m.tagIndex++
+		if m.tagIndex >= len(m.tags) {
+			m.tagIndex = 0
+			m.filter = filterAll
+		}
+		return
+	}
+
+	next := (m.filter + 1) % filterCount
+	if next == filterByTag && len(m.tags) == 0 {
+		next = filterAll
+	}
+	if next == filterByTag {
+		m.tagIndex = 0
+	}
+	m.filter = next
 }
 
 func (m secretListModel) Update(msg tea.Msg) (secretListModel, tea.Cmd) {
@@ -217,7 +282,7 @@ func (m secretListModel) handleNormalKeys(msg tea.KeyMsg) (secretListModel, tea.
 		m.status = ""
 		return m, textinput.Blink
 	case msg.String() == "tab":
-		m.filter = (m.filter + 1) % filterCount
+		m.advanceFilter()
 		m.status = ""
 		m = m.loadSecrets()
 	case msg.String() == "n":
@@ -236,21 +301,25 @@ func (m secretListModel) handleNormalKeys(msg tea.KeyMsg) (secretListModel, tea.
 func (m secretListModel) View() string {
 	var b strings.Builder
 
-	// filter tabs
+	// filter tabs (type filters, then active tag if in tag mode)
 	b.WriteString("\n  ")
-	for i := typeFilter(0); i < filterCount; i++ {
+	activeStyle := lipgloss.NewStyle().Foreground(zstyle.ZvaultAccent).Bold(true)
+	inactiveStyle := lipgloss.NewStyle().Foreground(zstyle.Overlay1)
+	sepStyle := lipgloss.NewStyle().Foreground(zstyle.Surface2)
+	for i := typeFilter(0); i <= filterNote; i++ {
 		label := i.label()
 		if i == m.filter {
-			style := lipgloss.NewStyle().Foreground(zstyle.ZvaultAccent).Bold(true)
-			b.WriteString(style.Render(label))
+			b.WriteString(activeStyle.Render(label))
 		} else {
-			style := lipgloss.NewStyle().Foreground(zstyle.Overlay1)
-			b.WriteString(style.Render(label))
+			b.WriteString(inactiveStyle.Render(label))
 		}
-		if i < filterCount-1 {
-			sep := lipgloss.NewStyle().Foreground(zstyle.Surface2).Render(" | ")
-			b.WriteString(sep)
-		}
+		b.WriteString(sepStyle.Render(" | "))
+	}
+	// tag indicator
+	if m.filter == filterByTag && len(m.tags) > 0 {
+		b.WriteString(activeStyle.Render("#" + m.tags[m.tagIndex]))
+	} else if len(m.tags) > 0 {
+		b.WriteString(inactiveStyle.Render("tags"))
 	}
 	b.WriteString("\n")
 
@@ -310,6 +379,13 @@ func (m secretListModel) View() string {
 		warn := lipgloss.NewStyle().Foreground(zstyle.Warning)
 		b.WriteString("\n")
 		b.WriteString(warn.Render(fmt.Sprintf("  delete '%s'? (y/n)", s.Name)))
+		b.WriteString("\n")
+	}
+
+	// error message
+	if m.err != "" {
+		b.WriteString("\n")
+		b.WriteString(zstyle.StatusErr.Render("  " + m.err))
 		b.WriteString("\n")
 	}
 

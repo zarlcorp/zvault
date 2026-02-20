@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/zarlcorp/core/pkg/zstyle"
+	"github.com/zarlcorp/zvault/internal/dates"
 	"github.com/zarlcorp/zvault/internal/task"
 	"github.com/zarlcorp/zvault/internal/vault"
 )
@@ -88,7 +89,7 @@ func (m *taskFormModel) loadTask(t task.Task) {
 	m.editing = &t
 	m.title.SetValue(t.Title)
 	m.priority = t.Priority
-	m.due.SetValue(formatDateForEdit(t.DueDate))
+	m.due.SetValue(dates.FormatForEdit(t.DueDate))
 	if len(t.Tags) > 0 {
 		m.tags.SetValue(strings.Join(t.Tags, ", "))
 	} else {
@@ -217,7 +218,7 @@ func (m taskFormModel) save() (taskFormModel, tea.Cmd) {
 	}
 
 	// parse due date
-	dueDate, err := parseRelativeDate(m.due.Value())
+	dueDate, err := dates.Parse(m.due.Value())
 	if err != nil {
 		m.err = err.Error()
 		return m, nil
@@ -251,7 +252,11 @@ func (m taskFormModel) save() (taskFormModel, tea.Cmd) {
 		}
 	} else {
 		// create new
-		t := task.New(title)
+		t, err := task.New(title)
+		if err != nil {
+			m.err = err.Error()
+			return m, nil
+		}
 		t.Priority = m.priority
 		t.DueDate = dueDate
 		t.Tags = tags

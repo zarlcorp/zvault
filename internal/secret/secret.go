@@ -30,10 +30,14 @@ type Secret struct {
 }
 
 // NewPassword creates a password secret.
-func NewPassword(name, url, username, password string) Secret {
+func NewPassword(name, url, username, password string) (Secret, error) {
+	id, err := generateID()
+	if err != nil {
+		return Secret{}, fmt.Errorf("new password secret: %w", err)
+	}
 	now := time.Now()
 	return Secret{
-		ID:   generateID(),
+		ID:   id,
 		Name: name,
 		Type: TypePassword,
 		Fields: map[string]string{
@@ -43,14 +47,18 @@ func NewPassword(name, url, username, password string) Secret {
 		},
 		CreatedAt: now,
 		UpdatedAt: now,
-	}
+	}, nil
 }
 
 // NewAPIKey creates an API key secret.
-func NewAPIKey(name, service, key string) Secret {
+func NewAPIKey(name, service, key string) (Secret, error) {
+	id, err := generateID()
+	if err != nil {
+		return Secret{}, fmt.Errorf("new api key secret: %w", err)
+	}
 	now := time.Now()
 	return Secret{
-		ID:   generateID(),
+		ID:   id,
 		Name: name,
 		Type: TypeAPIKey,
 		Fields: map[string]string{
@@ -59,14 +67,18 @@ func NewAPIKey(name, service, key string) Secret {
 		},
 		CreatedAt: now,
 		UpdatedAt: now,
-	}
+	}, nil
 }
 
 // NewSSHKey creates an SSH key secret.
-func NewSSHKey(name, label, privateKey, publicKey string) Secret {
+func NewSSHKey(name, label, privateKey, publicKey string) (Secret, error) {
+	id, err := generateID()
+	if err != nil {
+		return Secret{}, fmt.Errorf("new ssh key secret: %w", err)
+	}
 	now := time.Now()
 	return Secret{
-		ID:   generateID(),
+		ID:   id,
 		Name: name,
 		Type: TypeSSHKey,
 		Fields: map[string]string{
@@ -76,14 +88,18 @@ func NewSSHKey(name, label, privateKey, publicKey string) Secret {
 		},
 		CreatedAt: now,
 		UpdatedAt: now,
-	}
+	}, nil
 }
 
 // NewNote creates a note secret.
-func NewNote(name, content string) Secret {
+func NewNote(name, content string) (Secret, error) {
+	id, err := generateID()
+	if err != nil {
+		return Secret{}, fmt.Errorf("new note secret: %w", err)
+	}
 	now := time.Now()
 	return Secret{
-		ID:   generateID(),
+		ID:   id,
 		Name: name,
 		Type: TypeNote,
 		Fields: map[string]string{
@@ -91,7 +107,7 @@ func NewNote(name, content string) Secret {
 		},
 		CreatedAt: now,
 		UpdatedAt: now,
-	}
+	}, nil
 }
 
 // field returns a field value or empty string.
@@ -136,10 +152,10 @@ func (s Secret) Passphrase() string { return s.field("passphrase") }
 func (s Secret) Content() string { return s.field("content") }
 
 // generateID returns an 8-character hex string from 4 random bytes.
-func generateID() string {
+func generateID() (string, error) {
 	b := make([]byte, 4)
 	if _, err := rand.Read(b); err != nil {
-		panic(fmt.Sprintf("crypto/rand: %v", err))
+		return "", fmt.Errorf("generate id: %w", err)
 	}
-	return hex.EncodeToString(b)
+	return hex.EncodeToString(b), nil
 }

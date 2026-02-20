@@ -301,34 +301,20 @@ func timePtr(t time.Time) *time.Time {
 	return &t
 }
 
-func TestColorizeNoColor(t *testing.T) {
+func TestColorNoColor(t *testing.T) {
 	t.Setenv("NO_COLOR", "1")
 
 	got := red("hello")
-	if got != "hello" {
-		t.Fatalf("expected plain text with NO_COLOR, got %q", got)
+	// lipgloss respects NO_COLOR — output should be plain text
+	plain := stripANSI(got)
+	if plain != "hello" {
+		t.Fatalf("expected plain 'hello' with NO_COLOR, got %q (plain: %q)", got, plain)
 	}
 
 	got = bold("world")
-	if got != "world" {
-		t.Fatalf("expected plain text with NO_COLOR, got %q", got)
-	}
-}
-
-func TestColorizeWithColor(t *testing.T) {
-	// ensure NO_COLOR is not set
-	t.Setenv("NO_COLOR", "")
-	// NO_COLOR is presence-based per spec — unsetting it properly
-	// Since t.Setenv sets it to empty, LookupEnv returns true.
-	// Our noColor() uses LookupEnv, so even empty string counts.
-	// This test verifies that behavior is consistent.
-
-	// Just verify colorize wraps the string
-	got := colorize(ansiRed, "test")
-	// With NO_COLOR="" set, our noColor returns true (LookupEnv finds it)
-	if got != "test" {
-		// This is expected since we set NO_COLOR=""
-		t.Fatalf("expected no color with NO_COLOR='', got %q", got)
+	plain = stripANSI(got)
+	if plain != "world" {
+		t.Fatalf("expected plain 'world' with NO_COLOR, got %q (plain: %q)", got, plain)
 	}
 }
 
@@ -381,9 +367,12 @@ func TestCompletionOutput(t *testing.T) {
 }
 
 func TestNoColorEnvPresence(t *testing.T) {
-	// NO_COLOR spec: presence of the variable (even empty) disables color
-	t.Setenv("NO_COLOR", "")
-	if !noColor() {
-		t.Fatal("NO_COLOR='' should disable color (presence-based)")
+	// NO_COLOR spec: presence of the variable (even empty) disables color.
+	// lipgloss handles this automatically.
+	t.Setenv("NO_COLOR", "1")
+	got := red("test")
+	plain := stripANSI(got)
+	if plain != "test" {
+		t.Fatalf("expected plain text with NO_COLOR, got %q (plain: %q)", got, plain)
 	}
 }

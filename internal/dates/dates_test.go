@@ -1,4 +1,4 @@
-package tui
+package dates
 
 import (
 	"testing"
@@ -11,10 +11,12 @@ func fixedTime(year int, month time.Month, day int) func() time.Time {
 	}
 }
 
-func TestFormatRelativeDate(t *testing.T) {
-	orig := nowFunc
-	defer func() { nowFunc = orig }()
-	nowFunc = fixedTime(2026, time.February, 18)
+func ptr(t time.Time) *time.Time { return &t }
+
+func TestFormatRelative(t *testing.T) {
+	orig := NowFunc
+	defer func() { NowFunc = orig }()
+	NowFunc = fixedTime(2026, time.February, 18)
 
 	tests := []struct {
 		name string
@@ -34,48 +36,47 @@ func TestFormatRelativeDate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := formatRelativeDate(tt.date)
+			got := FormatRelative(tt.date)
 			if got != tt.want {
-				t.Errorf("formatRelativeDate(%v) = %q, want %q", tt.date, got, tt.want)
+				t.Errorf("FormatRelative(%v) = %q, want %q", tt.date, got, tt.want)
 			}
 		})
 	}
 }
 
-func TestFormatDueDateNil(t *testing.T) {
-	got := formatDueDate(nil)
-	if got != "" {
-		t.Errorf("formatDueDate(nil) = %q, want empty", got)
+func TestFormatDueNil(t *testing.T) {
+	if got := FormatDue(nil); got != "" {
+		t.Errorf("FormatDue(nil) = %q, want empty", got)
 	}
 }
 
 func TestIsOverdue(t *testing.T) {
-	orig := nowFunc
-	defer func() { nowFunc = orig }()
-	nowFunc = fixedTime(2026, time.February, 18)
+	orig := NowFunc
+	defer func() { NowFunc = orig }()
+	NowFunc = fixedTime(2026, time.February, 18)
 
 	past := time.Date(2026, 2, 17, 0, 0, 0, 0, time.Local)
 	today := time.Date(2026, 2, 18, 0, 0, 0, 0, time.Local)
 	future := time.Date(2026, 2, 19, 0, 0, 0, 0, time.Local)
 
-	if !isOverdue(&past) {
+	if !IsOverdue(&past) {
 		t.Error("past date should be overdue")
 	}
-	if isOverdue(&today) {
+	if IsOverdue(&today) {
 		t.Error("today should not be overdue")
 	}
-	if isOverdue(&future) {
+	if IsOverdue(&future) {
 		t.Error("future date should not be overdue")
 	}
-	if isOverdue(nil) {
+	if IsOverdue(nil) {
 		t.Error("nil should not be overdue")
 	}
 }
 
-func TestParseRelativeDate(t *testing.T) {
-	orig := nowFunc
-	defer func() { nowFunc = orig }()
-	nowFunc = fixedTime(2026, time.February, 18)
+func TestParse(t *testing.T) {
+	orig := NowFunc
+	defer func() { NowFunc = orig }()
+	NowFunc = fixedTime(2026, time.February, 18)
 
 	today := time.Date(2026, 2, 18, 0, 0, 0, 0, time.Local)
 
@@ -101,42 +102,38 @@ func TestParseRelativeDate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseRelativeDate(tt.input)
+			got, err := Parse(tt.input)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("parseRelativeDate(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
+				t.Errorf("Parse(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
 				return
 			}
 			if tt.wantErr {
 				return
 			}
 			if tt.want == nil && got != nil {
-				t.Errorf("parseRelativeDate(%q) = %v, want nil", tt.input, got)
+				t.Errorf("Parse(%q) = %v, want nil", tt.input, got)
 				return
 			}
 			if tt.want != nil {
 				if got == nil {
-					t.Errorf("parseRelativeDate(%q) = nil, want %v", tt.input, tt.want)
+					t.Errorf("Parse(%q) = nil, want %v", tt.input, tt.want)
 					return
 				}
 				if !got.Equal(*tt.want) {
-					t.Errorf("parseRelativeDate(%q) = %v, want %v", tt.input, *got, *tt.want)
+					t.Errorf("Parse(%q) = %v, want %v", tt.input, *got, *tt.want)
 				}
 			}
 		})
 	}
 }
 
-func TestFormatDateForEdit(t *testing.T) {
+func TestFormatForEdit(t *testing.T) {
 	d := time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC)
-	got := formatDateForEdit(&d)
+	got := FormatForEdit(&d)
 	if got != "2026-03-15" {
-		t.Errorf("formatDateForEdit = %q, want 2026-03-15", got)
+		t.Errorf("FormatForEdit = %q, want 2026-03-15", got)
 	}
-	if formatDateForEdit(nil) != "" {
-		t.Error("formatDateForEdit(nil) should be empty")
+	if FormatForEdit(nil) != "" {
+		t.Error("FormatForEdit(nil) should be empty")
 	}
-}
-
-func ptr(t time.Time) *time.Time {
-	return &t
 }

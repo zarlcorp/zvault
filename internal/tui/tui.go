@@ -87,13 +87,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.menu = m.menu.refreshCounts(m.vault)
 		}
 		// propagate navigateMsg to target sub-view so it can load data
+		var cmd tea.Cmd
 		switch msg.view {
 		case viewSecretList:
 			m.secretList.vault = m.vault
 			m.secretList, _ = m.secretList.Update(msg)
 		case viewSecretDetail:
 			m.secretDetail.vault = m.vault
-			m.secretDetail, _ = m.secretDetail.Update(msg)
+			m.secretDetail, cmd = m.secretDetail.Update(msg)
 		case viewSecretForm:
 			m.secretForm.vault = m.vault
 			m.secretForm, _ = m.secretForm.Update(msg)
@@ -107,7 +108,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.taskForm.vault = m.vault
 			m.taskForm, _ = m.taskForm.Update(msg)
 		}
-		return m, nil
+		return m, cmd
 
 	case vaultOpenedMsg:
 		m.vault = msg.vault

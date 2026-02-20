@@ -73,7 +73,11 @@ func runTaskAdd(args []string) {
 	}
 
 	title := strings.Join(pos, " ")
-	tk := task.New(title)
+	tk, err := task.New(title)
+	if err != nil {
+		errf("create task: %v", err)
+		os.Exit(1)
+	}
 	tk.Tags = tags
 
 	if pri != "" {

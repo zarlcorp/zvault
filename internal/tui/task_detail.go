@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/zarlcorp/core/pkg/zstyle"
+	"github.com/zarlcorp/zvault/internal/dates"
 	"github.com/zarlcorp/zvault/internal/task"
 	"github.com/zarlcorp/zvault/internal/vault"
 )
@@ -100,7 +101,7 @@ func (m taskDetailModel) toggleDone() (taskDetailModel, tea.Cmd) {
 
 	m.task.Done = !m.task.Done
 	if m.task.Done {
-		now := nowFunc()
+		now := dates.NowFunc()
 		m.task.CompletedAt = &now
 	} else {
 		m.task.CompletedAt = nil
@@ -156,11 +157,11 @@ func (m taskDetailModel) View() string {
 
 	// due date
 	if m.task.DueDate != nil {
-		dueStr := formatRelativeDate(*m.task.DueDate)
+		dueStr := dates.FormatRelative(*m.task.DueDate)
 		dateStr := m.task.DueDate.Format("2006-01-02")
 		display := fmt.Sprintf("%s (%s)", dueStr, dateStr)
 		dueStyle := detailValueStyle
-		if !m.task.Done && isOverdue(m.task.DueDate) {
+		if !m.task.Done && dates.IsOverdue(m.task.DueDate) {
 			dueStyle = detailValueStyle.Foreground(zstyle.Red)
 		}
 		b.WriteString(fmt.Sprintf("  %s%s\n", detailLabelStyle.Render("due"), dueStyle.Render(display)))

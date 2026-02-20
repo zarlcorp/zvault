@@ -1,4 +1,5 @@
-package tui
+// Package dates provides shared date parsing and formatting for zvault.
+package dates
 
 import (
 	"fmt"
@@ -7,15 +8,12 @@ import (
 	"time"
 )
 
-// nowFunc allows tests to override the current time.
-var nowFunc = time.Now
+// NowFunc allows tests to override the current time.
+var NowFunc = time.Now
 
-// formatRelativeDate returns a human-readable relative date string.
-// Future: "tomorrow", "in 3 days", "next week", "Mar 1"
-// Past: "yesterday", "overdue by 2 days"
-// Today: "today"
-func formatRelativeDate(t time.Time) string {
-	now := nowFunc()
+// FormatRelative returns a human-readable relative date string.
+func FormatRelative(t time.Time) string {
+	now := NowFunc()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	target := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 	days := int(target.Sub(today).Hours() / 24)
@@ -39,41 +37,40 @@ func formatRelativeDate(t time.Time) string {
 	return t.Format("Jan 2")
 }
 
-// formatDueDate returns a display string for a due date in the list view.
-// Returns empty string for nil.
-func formatDueDate(t *time.Time) string {
+// FormatDue returns a display string for a due date. Returns empty for nil.
+func FormatDue(t *time.Time) string {
 	if t == nil {
 		return ""
 	}
-	return formatRelativeDate(*t)
+	return FormatRelative(*t)
 }
 
-// isOverdue returns true if the date is before today.
-func isOverdue(t *time.Time) bool {
+// IsOverdue returns true if the date is before today.
+func IsOverdue(t *time.Time) bool {
 	if t == nil {
 		return false
 	}
-	now := nowFunc()
+	now := NowFunc()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	target := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 	return target.Before(today)
 }
 
-// parseRelativeDate parses a date string that can be:
-// - YYYY-MM-DD: absolute date
-// - tomorrow: next day
-// - +3d: 3 days from now
-// - +1w: 1 week from now
-// - next week: 7 days from now
-// - today: current day
-// Returns nil time pointer and error for empty/invalid input.
-func parseRelativeDate(s string) (*time.Time, error) {
+// Parse parses a date string that can be:
+//   - empty string: returns (nil, nil)
+//   - "today": current day
+//   - "tomorrow": next day
+//   - "next week": 7 days from now
+//   - "+Nd": N days from now
+//   - "+Nw": N weeks from now
+//   - "YYYY-MM-DD": absolute date
+func Parse(s string) (*time.Time, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return nil, nil
 	}
 
-	now := nowFunc()
+	now := NowFunc()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 
 	lower := strings.ToLower(s)
@@ -119,8 +116,8 @@ func parseRelativeDate(s string) (*time.Time, error) {
 	return &t, nil
 }
 
-// formatDateForEdit returns a YYYY-MM-DD string for editing, or empty for nil.
-func formatDateForEdit(t *time.Time) string {
+// FormatForEdit returns a YYYY-MM-DD string for editing, or empty for nil.
+func FormatForEdit(t *time.Time) string {
 	if t == nil {
 		return ""
 	}

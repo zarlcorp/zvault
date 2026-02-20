@@ -357,9 +357,14 @@ func (m secretFormModel) save() (secretFormModel, tea.Cmd) {
 
 func (m secretFormModel) createSecret(name string, vals map[string]string, tags []string) (secretFormModel, tea.Cmd) {
 	var s secret.Secret
+	var err error
 	switch m.secType {
 	case secret.TypePassword:
-		s = secret.NewPassword(name, vals["url"], vals["username"], vals["password"])
+		s, err = secret.NewPassword(name, vals["url"], vals["username"], vals["password"])
+		if err != nil {
+			m.err = err.Error()
+			return m, nil
+		}
 		if v := vals["totp_secret"]; v != "" {
 			s.Fields["totp_secret"] = v
 		}
@@ -367,12 +372,20 @@ func (m secretFormModel) createSecret(name string, vals map[string]string, tags 
 			s.Fields["notes"] = v
 		}
 	case secret.TypeAPIKey:
-		s = secret.NewAPIKey(name, vals["service"], vals["key"])
+		s, err = secret.NewAPIKey(name, vals["service"], vals["key"])
+		if err != nil {
+			m.err = err.Error()
+			return m, nil
+		}
 		if v := vals["notes"]; v != "" {
 			s.Fields["notes"] = v
 		}
 	case secret.TypeSSHKey:
-		s = secret.NewSSHKey(name, vals["label"], vals["private_key"], vals["public_key"])
+		s, err = secret.NewSSHKey(name, vals["label"], vals["private_key"], vals["public_key"])
+		if err != nil {
+			m.err = err.Error()
+			return m, nil
+		}
 		if v := vals["passphrase"]; v != "" {
 			s.Fields["passphrase"] = v
 		}
@@ -380,7 +393,11 @@ func (m secretFormModel) createSecret(name string, vals map[string]string, tags 
 			s.Fields["notes"] = v
 		}
 	case secret.TypeNote:
-		s = secret.NewNote(name, vals["content"])
+		s, err = secret.NewNote(name, vals["content"])
+		if err != nil {
+			m.err = err.Error()
+			return m, nil
+		}
 	}
 	s.Tags = tags
 
