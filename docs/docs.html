@@ -12,17 +12,21 @@
 
   <nav class="bar">
     <div class="container">
-      <a href="https://zarlcorp.github.io" class="nav-brand">zarlcorp</a>
-      <a href="index.html">zvault</a>
-      <a href="https://github.com/zarlcorp/zvault">github</a>
+      <div class="prompt">
+        <span class="prompt-user">zarlcorp</span><span class="prompt-sep">:</span><span class="prompt-path">~/zvault/docs</span><span class="prompt-dollar">$</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">zvault</a>
+        <a href="https://github.com/zarlcorp/zvault">github</a>
+      </div>
     </div>
   </nav>
 
   <div class="container docs-page">
 
-    <div class="window">
-      <div class="window-title">zvault docs</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault docs</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>zvault provides an interactive TUI and a scriptable CLI. run <code>zvault</code> with no arguments to launch the TUI, or use subcommands for automation.</p>
           <pre><code>zvault &lt;command&gt; [args]
@@ -38,9 +42,9 @@ commands:
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault secret store</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault secret store</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>create a new secret. you will be prompted for the secret value interactively.</p>
           <pre><code>zvault secret store -t &lt;type&gt; -n &lt;name&gt; [--tags tag1,tag2]</code></pre>
@@ -51,9 +55,9 @@ commands:
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault secret get</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault secret get</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>retrieve a secret by ID, name, or ID prefix. sensitive values are masked by default.</p>
           <pre><code>zvault secret get &lt;id-or-name&gt; [--show]</code></pre>
@@ -62,9 +66,9 @@ commands:
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault secret list</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault secret list</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>list all stored secrets. optionally filter by type or tag.</p>
           <pre><code>zvault secret list [-t &lt;type&gt;] [--tag &lt;tag&gt;]</code></pre>
@@ -72,9 +76,9 @@ commands:
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault secret delete</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault secret delete</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>delete a secret. prompts for confirmation before deleting.</p>
           <pre><code>zvault secret delete &lt;id-or-name&gt;</code></pre>
@@ -82,9 +86,9 @@ commands:
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault secret search</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault secret search</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>search secrets by name.</p>
           <pre><code>zvault secret search &lt;query&gt;</code></pre>
@@ -92,9 +96,9 @@ commands:
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault task add</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault task add</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>add a new task with optional priority, due date, and tags.</p>
           <pre><code>zvault task add [-p &lt;h|m|l&gt;] [-d &lt;date&gt;] [--tags tag1,tag2] &lt;title&gt;</code></pre>
@@ -103,9 +107,9 @@ commands:
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault task list</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault task list</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>list tasks. filter by status, priority, or tag.</p>
           <pre><code>zvault task list [--pending] [--done] [-p &lt;h|m|l&gt;] [--tag &lt;tag&gt;]</code></pre>
@@ -114,9 +118,9 @@ commands:
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault task done</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault task done</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>mark one or more tasks as complete.</p>
           <pre><code>zvault task done &lt;id&gt;
@@ -125,9 +129,9 @@ zvault task done &lt;id1&gt;,&lt;id2&gt;</code></pre>
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault task edit</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault task edit</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>rename a task.</p>
           <pre><code>zvault task edit &lt;id&gt; &lt;new title&gt;</code></pre>
@@ -135,9 +139,9 @@ zvault task done &lt;id1&gt;,&lt;id2&gt;</code></pre>
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault task rm</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault task rm</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>delete one or more tasks.</p>
           <pre><code>zvault task rm &lt;id&gt;
@@ -146,9 +150,9 @@ zvault task rm &lt;id1&gt;,&lt;id2&gt;</code></pre>
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault task clear</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault task clear</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>delete all completed tasks.</p>
           <pre><code>zvault task clear</code></pre>
@@ -156,9 +160,9 @@ zvault task rm &lt;id1&gt;,&lt;id2&gt;</code></pre>
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault export</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault export</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>export vault data as markdown. by default exports both secrets and tasks.</p>
           <pre><code>zvault export [--tasks] [--secrets] [--pending] [--done]</code></pre>
@@ -167,9 +171,9 @@ zvault task rm &lt;id1&gt;,&lt;id2&gt;</code></pre>
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault completion</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault completion</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>generate shell completion scripts.</p>
           <pre><code># bash (add to ~/.bashrc)
@@ -184,9 +188,9 @@ zvault completion fish | source</code></pre>
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">zvault version</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">zvault version</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>print the zvault version.</p>
           <pre><code>zvault version</code></pre>
@@ -194,9 +198,9 @@ zvault completion fish | source</code></pre>
       </div>
     </div>
 
-    <div class="window">
-      <div class="window-title">configuration</div>
-      <div class="window-content">
+    <div class="card">
+      <div class="card-header">configuration</div>
+      <div class="card-content">
         <div class="doc-content">
           <p>zvault stores its encrypted vault in <code>~/.local/share/zvault/</code>. the vault is initialized on first use via the TUI.</p>
           <p>set the <code>ZVAULT_PASSWORD</code> environment variable to skip interactive password prompts (useful for scripting).</p>
