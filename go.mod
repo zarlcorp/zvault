@@ -14,8 +14,6 @@ require (
 	golang.org/x/term v0.40.0
 )
 
-replace github.com/zarlcorp/core/pkg/zclipboard => ../core/pkg/zclipboard
-
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
