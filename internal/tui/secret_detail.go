@@ -2,6 +2,8 @@ package tui
 
 import (
 	"fmt"
+	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 
@@ -43,12 +45,22 @@ type secretDetailModel struct {
 	height int
 }
 
+// fieldAction determines what Enter does on a field.
+type fieldAction int
+
+const (
+	actionNone fieldAction = iota
+	actionCopy             // copy value to clipboard
+	actionOpen             // open value as URL
+)
+
 type detailField struct {
 	label      string
 	value      string
 	sensitive  bool
 	labelColor lipgloss.Color // per-field label color
 	live       bool           // live-updating field (e.g. TOTP code)
+	action     fieldAction    // what Enter does
 }
 
 func newSecretDetail() secretDetailModel {
@@ -105,28 +117,28 @@ func buildDetailFields(s secret.Secret) []detailField {
 
 	switch s.Type {
 	case secret.TypePassword:
-		fields = append(fields, detailField{label: "url", value: s.URL(), labelColor: normalColor})
-		fields = append(fields, detailField{label: "username", value: s.Username(), labelColor: normalColor})
-		fields = append(fields, detailField{label: "password", value: s.Password(), sensitive: true, labelColor: sensitiveColor})
+		fields = append(fields, detailField{label: "url", value: s.URL(), labelColor: normalColor, action: actionOpen})
+		fields = append(fields, detailField{label: "username", value: s.Username(), labelColor: normalColor, action: actionCopy})
+		fields = append(fields, detailField{label: "password", value: s.Password(), sensitive: true, labelColor: sensitiveColor, action: actionCopy})
 		if s.TOTPSecret() != "" {
 			fields = append(fields, detailField{label: "totp secret", value: s.TOTPSecret(), sensitive: true, labelColor: sensitiveColor})
-			fields = append(fields, detailField{label: "totp code", live: true, labelColor: zstyle.Green})
+			fields = append(fields, detailField{label: "totp code", live: true, labelColor: zstyle.Green, action: actionCopy})
 		}
 		if s.Notes() != "" {
 			fields = append(fields, detailField{label: "notes", value: s.Notes(), labelColor: normalColor})
 		}
 	case secret.TypeAPIKey:
 		fields = append(fields, detailField{label: "service", value: s.Service(), labelColor: normalColor})
-		fields = append(fields, detailField{label: "key", value: s.Key(), sensitive: true, labelColor: sensitiveColor})
+		fields = append(fields, detailField{label: "key", value: s.Key(), sensitive: true, labelColor: sensitiveColor, action: actionCopy})
 		if s.Notes() != "" {
 			fields = append(fields, detailField{label: "notes", value: s.Notes(), labelColor: normalColor})
 		}
 	case secret.TypeSSHKey:
 		fields = append(fields, detailField{label: "label", value: s.Label(), labelColor: normalColor})
-		fields = append(fields, detailField{label: "private key", value: s.PrivateKey(), sensitive: true, labelColor: sensitiveColor})
-		fields = append(fields, detailField{label: "public key", value: s.PublicKey(), labelColor: normalColor})
+		fields = append(fields, detailField{label: "private key", value: s.PrivateKey(), sensitive: true, labelColor: sensitiveColor, action: actionCopy})
+		fields = append(fields, detailField{label: "public key", value: s.PublicKey(), labelColor: normalColor, action: actionCopy})
 		if s.Passphrase() != "" {
-			fields = append(fields, detailField{label: "passphrase", value: s.Passphrase(), sensitive: true, labelColor: sensitiveColor})
+			fields = append(fields, detailField{label: "passphrase", value: s.Passphrase(), sensitive: true, labelColor: sensitiveColor, action: actionCopy})
 		}
 		if s.Notes() != "" {
 			fields = append(fields, detailField{label: "notes", value: s.Notes(), labelColor: normalColor})
@@ -218,17 +230,12 @@ func (m secretDetailModel) handleKeys(msg tea.KeyMsg) (secretDetailModel, tea.Cm
 		if m.cursor < len(m.fields)-1 {
 			m.cursor++
 		}
+	case key.Matches(msg, zstyle.KeyEnter):
+		if m.cursor < len(m.fields) {
+			return m.handleFieldAction(m.fields[m.cursor])
+		}
 	case msg.String() == "s":
 		m.showSensitive = !m.showSensitive
-	case msg.String() == "c":
-		if m.cursor < len(m.fields) {
-			f := m.fields[m.cursor]
-			val := f.value
-			if f.live && m.totpCode != "" {
-				val = m.totpCode
-			}
-			return m, copyToClipboard(f.label, val)
-		}
 	case msg.String() == "e":
 		return m, func() tea.Msg {
 			return navigateMsg{view: viewSecretForm, data: m.secretID}
@@ -237,6 +244,45 @@ func (m secretDetailModel) handleKeys(msg tea.KeyMsg) (secretDetailModel, tea.Cm
 		m.confirmDelete = true
 	}
 	return m, nil
+}
+
+func (m secretDetailModel) handleFieldAction(f detailField) (secretDetailModel, tea.Cmd) {
+	switch f.action {
+	case actionCopy:
+		return m.handleFieldCopy(f)
+	case actionOpen:
+		if f.value != "" {
+			return m, openURL(f.value)
+		}
+	}
+	return m, nil
+}
+
+func (m secretDetailModel) handleFieldCopy(f detailField) (secretDetailModel, tea.Cmd) {
+	val := f.value
+	if f.live && m.totpCode != "" {
+		val = m.totpCode
+	}
+	return m, copyToClipboard(f.label, val)
+}
+
+// openURL opens a URL in the default browser.
+func openURL(url string) tea.Cmd {
+	return func() tea.Msg {
+		var cmd *exec.Cmd
+		switch runtime.GOOS {
+		case "darwin":
+			cmd = exec.Command("open", url)
+		case "linux":
+			cmd = exec.Command("xdg-open", url)
+		case "windows":
+			cmd = exec.Command("cmd", "/c", "start", url)
+		default:
+			return nil
+		}
+		_ = cmd.Start()
+		return nil
+	}
 }
 
 func (m secretDetailModel) View() string {

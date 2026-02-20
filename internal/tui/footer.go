@@ -33,7 +33,7 @@ func helpFor(id viewID) []zstyle.HelpPair {
 		}
 	case viewSecretDetail:
 		return []zstyle.HelpPair{
-			{Key: "c", Desc: "copy"},
+			{Key: "enter", Desc: "copy/open"},
 			{Key: "s", Desc: "show/hide"},
 			{Key: "e", Desc: "edit"},
 			{Key: "d", Desc: "delete"},

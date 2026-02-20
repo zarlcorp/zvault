@@ -362,6 +362,87 @@ func TestBuildDetailFieldsNote(t *testing.T) {
 	}
 }
 
+func TestBuildDetailFieldsActions(t *testing.T) {
+	s, err := secret.NewPassword("Test", "http://example.com", "user", "pass123")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Fields["totp_secret"] = "JBSWY3DPEHPK3PXP"
+	fields := buildDetailFields(s)
+
+	wantActions := map[string]fieldAction{
+		"url":      actionOpen,
+		"username": actionCopy,
+		"password": actionCopy,
+		"totp code": actionCopy,
+	}
+
+	for _, f := range fields {
+		if want, ok := wantActions[f.label]; ok {
+			if f.action != want {
+				t.Errorf("field %q action = %d, want %d", f.label, f.action, want)
+			}
+		}
+	}
+
+	// fields without explicit action should be actionNone
+	for _, f := range fields {
+		if _, hasExplicit := wantActions[f.label]; hasExplicit {
+			continue
+		}
+		if f.label == "name" || f.label == "type" || f.label == "notes" || f.label == "tags" || f.label == "created" || f.label == "updated" || f.label == "totp secret" {
+			if f.action != actionNone {
+				t.Errorf("field %q action = %d, want actionNone", f.label, f.action)
+			}
+		}
+	}
+}
+
+func TestSecretDetailEnterCopiesUsername(t *testing.T) {
+	s, err := secret.NewPassword("test", "http://example.com", "myuser", "pass")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := newSecretDetail()
+	m.secretID = "test"
+	m.secret = s
+	m.fields = buildDetailFields(m.secret)
+
+	// move cursor to username (index 3: name, type, url, username)
+	m.cursor = 3
+	if m.fields[m.cursor].label != "username" {
+		t.Fatalf("field at cursor 3 = %q, want username", m.fields[m.cursor].label)
+	}
+
+	// enter should produce a copy command
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd == nil {
+		t.Fatal("enter on username should produce a command")
+	}
+}
+
+func TestSecretDetailEnterNoActionOnMetadata(t *testing.T) {
+	s, err := secret.NewPassword("test", "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := newSecretDetail()
+	m.secretID = "test"
+	m.secret = s
+	m.fields = buildDetailFields(m.secret)
+
+	// move cursor to "created" (last few fields)
+	m.cursor = len(m.fields) - 2
+	if m.fields[m.cursor].label != "created" {
+		t.Fatalf("field at cursor = %q, want created", m.fields[m.cursor].label)
+	}
+
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd != nil {
+		t.Fatal("enter on metadata field should not produce a command")
+	}
+}
+
 func TestBuildDetailFieldsMetadata(t *testing.T) {
 	s, err := secret.NewPassword("test", "", "", "")
 	if err != nil {
